@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% set active='saju' %}
+{% block title %}사주 추천{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>🔮 사주(명리학) 기반 번호 추천</h2>
+  <p class="muted">생년월일시로 사주팔자를 계산하고, 부족한 오행과 추첨일의 기운을 반영해 번호를 뽑습니다.</p>
+
+  <form method="post">
+    <label>달력</label>
+    <div>
+      <span class="radio"><input type="radio" name="calendar" value="solar"
+        {{ 'checked' if form.get('calendar','solar')=='solar' }}> 양력</span>
+      <span class="radio"><input type="radio" name="calendar" value="lunar"
+        {{ 'checked' if form.get('calendar')=='lunar' }}> 음력</span>
+      <span class="radio"><input type="checkbox" name="is_leap"
+        {{ 'checked' if form.get('is_leap') }}> 윤달(음력만)</span>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>년</label>
+        <select name="year" required>
+          {% for y in range(2026, 1929, -1) %}
+          <option value="{{ y }}" {{ 'selected' if form.get('year')|string==y|string }}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>월</label>
+        <select name="month">
+          {% for m in range(1,13) %}
+          <option value="{{ m }}" {{ 'selected' if form.get('month')|string==m|string }}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>일</label>
+        <select name="day">
+          {% for d in range(1,32) %}
+          <option value="{{ d }}" {{ 'selected' if form.get('day')|string==d|string }}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>태어난 시각</label>
+        <select name="hour">
+          <option value="unknown">모름</option>
+          {% set jinames = ['자(23~01)','축(01~03)','인(03~05)','묘(05~07)','진(07~09)','사(09~11)','오(11~13)','미(13~15)','신(15~17)','유(17~19)','술(19~21)','해(21~23)'] %}
+          {% for h in range(0,24) %}
+          <option value="{{ h }}" {{ 'selected' if form.get('hour')|string==h|string }}>{{ '%02d시'|format(h) }} · {{ jinames[((h+1)//2)%12] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>추첨일 (기본: 다가오는 토요일)</label>
+        <input type="date" name="draw_date" value="{{ form.get('draw_date', default_draw) }}">
+      </div>
+    </div>
+
+    <div style="margin-top:16px"><button class="btn" type="submit">🔮 내 번호 뽑기</button></div>
+  </form>
+</div>
+
+{% if error %}
+<div class="card"><p style="color:#ff8a8a">{{ error }}</p></div>
+{% endif %}
+
+{% if result %}
+<div class="card">
+  <h2>✨ 추천 결과</h2>
+  <div class="balls">
+    {% for n in result.numbers %}
+    <div style="text-align:center">
+      {{ ball(n) }}
+      <div class="ball-oh oh-{{ result.num_oheng[loop.index0] }}">{{ result.num_oheng[loop.index0] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h3>내 사주팔자</h3>
+  <div class="row" style="gap:8px">
+    {% for k, v in result.pillars.items() %}
+    <div class="mini"><div class="muted">{{ k }}</div><div class="big" style="font-size:18px">{{ v }}</div></div>
+    {% endfor %}
+  </div>
+
+  <h3>오행 분포 <span class="muted" style="font-size:12px">(일간: {{ result.ilgan }})</span></h3>
+  <div class="row" style="gap:8px">
+    {% for o, c in result.oheng.items() %}
+    <span class="tag oh-{{ o }}">{{ o }} × {{ c }}</span>
+    {% endfor %}
+  </div>
+
+  <p class="muted" style="margin-top:14px;font-size:13px">
+    양력 기준일 {{ result.solar }}{% if result.calendar=='lunar' %} (음력 입력을 변환){% endif %} ·
+    추첨일 {{ result.draw_date }} 일진 <b>{{ result.draw_iljin }}</b>의 기운 반영 ·
+    같은 사람·같은 추첨일이면 항상 같은 번호가 나옵니다.
+  </p>
+</div>
+{% endif %}
+
+{% endblock %}

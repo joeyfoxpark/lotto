@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}로또 번호 추천{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+{# 번호를 로또 볼로 그리는 매크로 #}
+{% macro ball(n, small=false) %}
+  {% set cls = 'b1' if n<=10 else 'b2' if n<=20 else 'b3' if n<=30 else 'b4' if n<=40 else 'b5' %}
+  <div class="ball {{ cls }} {{ 'sm' if small else '' }}">{{ n }}</div>
+{% endmacro %}
+
+<header>
+  <div class="head-in">
+    <div class="logo">🍀 <span>행운로또</span></div>
+    <nav>
+      <a href="/"          class="{{ 'active' if active=='home' }}">홈</a>
+      <a href="/stats"     class="{{ 'active' if active=='stats' }}">통계</a>
+      <a href="/recommend" class="{{ 'active' if active=='rec' }}">패턴추천</a>
+      <a href="/saju"      class="{{ 'active' if active=='saju' }}">사주추천</a>
+      <a href="/stores"    class="{{ 'active' if active=='stores' }}">당첨판매점</a>
+      <a href="/predict"   class="{{ 'active' if active=='predict' }}">예측성공률</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  {% block content %}{% endblock %}
+
+  <div class="disc">
+    ⚠️ 로또는 매 회차 완전한 <b>무작위 추첨</b>입니다. 이 서비스의 통계·추천·사주 분석은
+    <b>재미/참고용</b>이며, 실제 당첨 확률을 높여주지 않습니다. 과도한 구매는 삼가세요.
+  </div>
+</div>
+
+</body>
+</html>

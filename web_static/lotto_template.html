@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🍀 행운로또 — 통계·패턴·사주 번호</title>
+<style>
+:root{--bg:#0f1226;--card:#1a1f3d;--card2:#232a52;--line:#2e3768;--txt:#e8eaf5;
+--muted:#9aa3d0;--accent:#5b8cff;--accent2:#7a5cff;--good:#33d69f;--warn:#ffcf5c;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;
+background:linear-gradient(160deg,#0f1226,#141a35);color:var(--txt);min-height:100vh;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 60px}
+header{position:sticky;top:0;z-index:10;background:rgba(15,18,38,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.head-in{max-width:900px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.logo span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+nav a{padding:7px 12px;border-radius:20px;font-size:14px;color:var(--muted);border:1px solid transparent;cursor:pointer}
+nav a:hover{color:#fff;background:var(--card)}
+nav a.active{color:#fff;background:var(--card2);border-color:var(--line)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+.card h2{font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h3{font-size:15px;color:var(--muted);margin:14px 0 8px}
+.hero{text-align:center;padding:28px 20px}.hero h1{font-size:26px;margin-bottom:6px}.hero p{color:var(--muted)}
+.balls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.ball{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#1a1a1a;font-size:17px;box-shadow:inset 0 -3px 6px rgba(0,0,0,.25),0 3px 6px rgba(0,0,0,.3)}
+.b1{background:#fbc400}.b2{background:#69c8f2}.b3{background:#ff7272}.b4{background:#aaaaaa}.b5{background:#b0d840}
+.ball.sm{width:34px;height:34px;font-size:14px}
+.plus{align-self:center;color:var(--muted);font-weight:800;font-size:20px}
+.ball-oh{font-size:12px;color:var(--muted);text-align:center;width:44px}
+.btn{display:inline-block;padding:11px 20px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:15px;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.btn:hover{filter:brightness(1.1)}.btn.ghost{background:var(--card2);border:1px solid var(--line)}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:#fff;font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:90px}
+.radio{display:inline-flex;gap:6px;align-items:center;width:auto;margin-right:14px}.radio input{width:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600}tr:hover td{background:var(--card2)}
+.rank-badge{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:8px;background:var(--card2);font-weight:700;font-size:13px}
+.gold{background:linear-gradient(90deg,#f9d423,#e6a817);color:#1a1a1a}
+.freqrow{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:13px}
+.freqrow .n{width:28px;color:var(--muted)}
+.bar{height:14px;border-radius:7px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+.oh-목{color:#7ee081}.oh-화{color:#ff8a8a}.oh-토{color:#ffd479}.oh-금{color:#e0e0e0}.oh-수{color:#7ab8ff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.mini{background:var(--card2);border-radius:12px;padding:12px;text-align:center}.mini .big{font-size:22px;font-weight:800}
+.muted{color:var(--muted)}
+.disc{font-size:12px;color:var(--muted);text-align:center;margin-top:24px;padding:14px;border:1px dashed var(--line);border-radius:12px}
+.strat{border-left:3px solid var(--accent);padding-left:12px;margin:14px 0}.strat .name{font-weight:700}
+.page{display:none}.page.active{display:block}
+</style>
+</head>
+<body>
+<header><div class="head-in">
+  <div class="logo">🍀 <span>행운로또</span></div>
+  <nav id="nav">
+    <a data-p="home" class="active">홈</a>
+    <a data-p="stats">통계</a>
+    <a data-p="rec">패턴추천</a>
+    <a data-p="saju">사주추천</a>
+    <a data-p="stores">당첨판매점</a>
+    <a data-p="predict">예측성공률</a>
+  </nav>
+</div></header>
+
+<div class="wrap">
+  <div id="home" class="page active"></div>
+  <div id="stats" class="page"></div>
+  <div id="rec" class="page"></div>
+  <div id="saju" class="page"></div>
+  <div id="stores" class="page"></div>
+  <div id="predict" class="page"></div>
+
+  <div class="disc">⚠️ 로또는 매 회차 완전한 <b>무작위 추첨</b>입니다. 이 페이지의 통계·추천·사주 분석은
+  <b>재미/참고용</b>이며 실제 당첨 확률을 높여주지 않습니다. 과도한 구매는 삼가세요.</div>
+</div>
+
+<script>
+const DATA = null; /*__DATA__*/
+
+// ====================== 공통 유틸 ======================
+const NUMS = Array.from({length:45},(_,i)=>i+1);
+const draws = DATA.draws;                       // [round,date,n1..n6,bonus,...]
+const drawNums = draws.map(d=>d.slice(2,8));    // [[6개],...]
+const DRAW_BY_ROUND={};draws.forEach(d=>DRAW_BY_ROUND[d[0]]=d);
+const LATEST_ROUND=draws[draws.length-1][0];
+const el = id => document.getElementById(id);
+function ballCls(n){return n<=10?'b1':n<=20?'b2':n<=30?'b3':n<=40?'b4':'b5';}
+function ball(n,sm){return `<div class="ball ${ballCls(n)} ${sm?'sm':''}">${n}</div>`;}
+function ballsRow(arr,sm){return `<div class="balls" style="justify-content:flex-start">${arr.map(n=>ball(n,sm)).join('')}</div>`;}
+function comma(x){return (x||0).toLocaleString();}
+
+// ====================== 통계 ======================
+function computeStats(){
+  const freq={},recent={},last={};
+  NUMS.forEach(n=>{freq[n]=0;recent[n]=0;last[n]=0;});
+  drawNums.forEach((nums,i)=>{const rnd=draws[i][0];nums.forEach(n=>{freq[n]++;last[n]=rnd;});});
+  drawNums.slice(-50).forEach(nums=>nums.forEach(n=>recent[n]++));
+  const newest=draws[draws.length-1][0];
+  const gap={};NUMS.forEach(n=>gap[n]=last[n]?newest-last[n]:newest);
+  // 홀짝
+  const oe={};drawNums.forEach(nums=>{const o=nums.filter(n=>n%2).length;const k=o+':'+(6-o);oe[k]=(oe[k]||0)+1;});
+  // 구간
+  const bands={'1-10':0,'11-20':0,'21-30':0,'31-40':0,'41-45':0};
+  drawNums.forEach(nums=>nums.forEach(n=>{bands[n<=10?'1-10':n<=20?'11-20':n<=30?'21-30':n<=40?'31-40':'41-45']++;}));
+  // 연속
+  let consec=0;drawNums.forEach(nums=>{const s=[...nums].sort((a,b)=>a-b);for(let i=0;i<5;i++)if(s[i]+1===s[i+1]){consec++;break;}});
+  // 합계
+  const sums=drawNums.map(n=>n.reduce((a,b)=>a+b,0));
+  const avg=Math.round(sums.reduce((a,b)=>a+b,0)/sums.length*10)/10;
+  // 궁합쌍
+  const pair={};drawNums.forEach(nums=>{const s=[...nums].sort((a,b)=>a-b);for(let i=0;i<6;i++)for(let j=i+1;j<6;j++){const k=s[i]+'-'+s[j];pair[k]=(pair[k]||0)+1;}});
+  const pairs=Object.entries(pair).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,c])=>[k.split('-').map(Number),c]);
+  return {freq,recent,gap,oe,bands,consec,total:draws.length,avg,
+    sumMin:Math.min(...sums),sumMax:Math.max(...sums),pairs,newest};
+}
+
+// ====================== 패턴 추천 ======================
+function weightedPick(weights,k){
+  const pool=Object.keys(weights).map(Number),w=pool.map(n=>weights[n]);
+  const chosen=new Set();
+  while(chosen.size<k){
+    let tot=0;pool.forEach((n,i)=>{if(!chosen.has(n))tot+=w[i];});
+    let r=Math.random()*tot;
+    for(let i=0;i<pool.length;i++){if(chosen.has(pool[i]))continue;r-=w[i];if(r<=0){chosen.add(pool[i]);break;}}
+  }
+  return [...chosen].sort((a,b)=>a-b);
+}
+function sampleUnique(k){const s=new Set();while(s.size<k)s.add(1+Math.floor(Math.random()*45));return [...s].sort((a,b)=>a-b);}
+function bandOf(n){return n<=40?Math.floor((n-1)/10):4;}
+function isRealistic(nums){
+  const s=[...nums].sort((a,b)=>a-b),tot=s.reduce((a,b)=>a+b,0);
+  if(tot<100||tot>175)return false;
+  const odd=s.filter(n=>n%2).length;if(odd===0||odd===6)return false;
+  if(new Set(s.map(bandOf)).size<3)return false;
+  for(let i=0;i<4;i++)if(s[i]+1===s[i+1]&&s[i+1]+1===s[i+2])return false;
+  return true;
+}
+const STAT_FREQ=(()=>{const f={};NUMS.forEach(n=>f[n]=0);drawNums.forEach(nums=>nums.forEach(n=>f[n]++));return f;})();
+const STAT_PAIRS=(()=>{const p={};drawNums.forEach(nums=>{const s=[...nums].sort((a,b)=>a-b);for(let i=0;i<6;i++)for(let j=i+1;j<6;j++)p[s[i]+'-'+s[j]]=(p[s[i]+'-'+s[j]]||0)+1;});return Object.entries(p).sort((a,b)=>b[1]-a[1]).slice(0,40).map(e=>e[0].split('-').map(Number));})();
+function stratHot(){const w={};NUMS.forEach(n=>w[n]=Math.pow(STAT_FREQ[n]||1,2));return weightedPick(w,6);}
+function stratCold(){const last={};NUMS.forEach(n=>last[n]=0);drawNums.forEach((nums,i)=>nums.forEach(n=>last[n]=draws[i][0]));const nw=draws[draws.length-1][0];const w={};NUMS.forEach(n=>w[n]=Math.pow(nw-last[n]+1,2));return weightedPick(w,6);}
+function stratBalanced(){for(let i=0;i<2000;i++){const c=sampleUnique(6);if(isRealistic(c))return c;}return sampleUnique(6);}
+function stratCompanion(){const [a,b]=STAT_PAIRS[Math.floor(Math.random()*STAT_PAIRS.length)];const ch=new Set([a,b]);const w={};NUMS.forEach(n=>{if(!ch.has(n))w[n]=STAT_FREQ[n]||1;});const pool=Object.keys(w).map(Number);while(ch.size<6){let tot=0;pool.forEach(n=>{if(!ch.has(n))tot+=w[n];});let r=Math.random()*tot;for(const n of pool){if(ch.has(n))continue;r-=w[n];if(r<=0){ch.add(n);break;}}}return [...ch].sort((a,b)=>a-b);}
+function stratRandom(){return sampleUnique(6);}
+const PRIMES=new Set([2,3,5,7,11,13,17,19,23,29,31,37,41,43]);
+function pickFrom(arr,k){const s=new Set();while(s.size<k)s.add(arr[Math.floor(Math.random()*arr.length)]);return [...s];}
+// 저고균형: 저(1~22) 3개 + 고(23~45) 3개
+function stratLowHigh(){const lo=[],hi=[];for(let n=1;n<=22;n++)lo.push(n);for(let n=23;n<=45;n++)hi.push(n);return [...pickFrom(lo,3),...pickFrom(hi,3)].sort((a,b)=>a-b);}
+// 끝수분산: 서로 다른 끝자리 위주
+function stratEnding(){for(let t=0;t<800;t++){const c=sampleUnique(6);if(new Set(c.map(n=>n%10)).size>=5)return c;}return sampleUnique(6);}
+// 소수선호
+function stratPrime(){const w={};NUMS.forEach(n=>w[n]=PRIMES.has(n)?6:1);return weightedPick(w,6);}
+// 최근트렌드: 최근 10회 가중
+function stratTrend(){const w={};NUMS.forEach(n=>w[n]=1);drawNums.slice(-10).forEach(nums=>nums.forEach(n=>w[n]+=4));return weightedPick(w,6);}
+// 장기미출현: 가장 오래 안 나온 15개 중에서
+function stratOverdue(){const last={};NUMS.forEach(n=>last[n]=0);drawNums.forEach((nums,i)=>nums.forEach(n=>last[n]=draws[i][0]));const nw=draws[draws.length-1][0];const top=NUMS.map(n=>[n,nw-last[n]]).sort((a,b)=>b[1]-a[1]).slice(0,15).map(e=>e[0]);return pickFrom(top,6).sort((a,b)=>a-b);}
+// 합계중심: 합 105~145 (가장 흔한 구간)
+function stratSumBand(){for(let t=0;t<3000;t++){const c=sampleUnique(6);const s=c.reduce((a,b)=>a+b,0);if(s>=105&&s<=145)return c;}return sampleUnique(6);}
+// 이월제외: 직전 회차 번호 빼고 균형
+function stratFresh(){const prev=new Set(drawNums[drawNums.length-1]);for(let t=0;t<3000;t++){const c=sampleUnique(6);if(c.some(n=>prev.has(n)))continue;if(isRealistic(c))return c;}return sampleUnique(6);}
+// 완벽밸런스: 홀짝3:3 + 저고3:3 + 합100~170 + 4구간이상
+function stratPerfect(){for(let t=0;t<8000;t++){const s=sampleUnique(6);const odd=s.filter(n=>n%2).length,low=s.filter(n=>n<=22).length,sum=s.reduce((a,b)=>a+b,0);if(odd===3&&low===3&&sum>=100&&sum<=170&&new Set(s.map(bandOf)).size>=4)return s;}return stratBalanced();}
+// [표시이름, 설명, 함수]
+const STRATS={
+  hot:['핫넘버','자주 나온 번호 강조',stratHot],
+  cold:['콜드넘버','오래 안 나온 번호 강조',stratCold],
+  trend:['최근트렌드','최근 10회에 많이 나온 번호',stratTrend],
+  overdue:['장기미출현','가장 오래 안 나온 번호 위주',stratOverdue],
+  balanced:['균형','홀짝·구간·합계 균형',stratBalanced],
+  perfect:['완벽밸런스','홀짝3:3·저고3:3·구간분산',stratPerfect],
+  lowhigh:['저고균형','낮은수 3 + 높은수 3',stratLowHigh],
+  sumband:['합계중심','합계가 흔한 구간(105~145)',stratSumBand],
+  ending:['끝수분산','끝자리를 골고루',stratEnding],
+  companion:['궁합수','자주 함께 나온 쌍에서 확장',stratCompanion],
+  prime:['소수','소수(2,3,5,7…)를 선호',stratPrime],
+  fresh:['이월제외','직전 회차 번호 제외',stratFresh],
+  random:['무작위','완전 무작위(기준선)',stratRandom],
+};
+
+// ====================== 사주(명리) ======================
+const GAN=['갑','을','병','정','무','기','경','신','임','계'];
+const JI=['자','축','인','묘','진','사','오','미','신','유','술','해'];
+const GAN_OH=['목','목','화','화','토','토','금','금','수','수'];
+const JI_OH={인:'목',묘:'목',사:'화',오:'화',진:'토',술:'토',축:'토',미:'토',신:'금',유:'금',자:'수',해:'수'};
+const JEOL=[[315,'인'],[345,'묘'],[15,'진'],[45,'사'],[75,'오'],[105,'미'],[135,'신'],[165,'유'],[195,'술'],[225,'해'],[255,'자'],[285,'축']];
+function jdFromUT(y,m,d,hour,minute){hour=hour||0;minute=minute||0;let day=d+(hour+minute/60)/24;if(m<=2){y-=1;m+=12;}const a=Math.floor(y/100),b=2-a+Math.floor(a/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+day+b-1524.5;}
+function sunLong(jd){const t=(jd-2451545)/36525;const l0=280.46646+36000.76983*t+0.0003032*t*t;const m=357.52911+35999.05029*t-0.0001537*t*t;const mr=(m%360)*Math.PI/180;const c=(1.914602-0.004817*t-0.000014*t*t)*Math.sin(mr)+(0.019993-0.000101*t)*Math.sin(2*mr)+0.000289*Math.sin(3*mr);const om=(125.04-1934.136*t)*Math.PI/180;let ap=l0+c-0.00569-0.00478*Math.sin(om);return ((ap%360)+360)%360;}
+function kstToJd(y,m,d,hour,minute){return jdFromUT(y,m,d,(hour==null?12:hour)-9,minute||0);}
+function monthBranch(y,m,d,hour,minute){const lam=sunLong(kstToJd(y,m,d,hour,minute));const idx=Math.floor((((lam-315)%360)+360)%360/30);return JEOL[idx][1];}
+function ipchunJd(year){let lo=jdFromUT(year,2,1)-20,hi=lo+45;const f=jd=>{let diff=((sunLong(jd)-315+180)%360+360)%360-180;return diff;};let flo=f(lo);for(let i=0;i<60;i++){const mid=(lo+hi)/2,fm=f(mid);if(flo*fm<=0){hi=mid;}else{lo=mid;flo=fm;}}return (lo+hi)/2;}
+function beforeIpchun(y,m,d,hour,minute){return kstToJd(y,m,d,hour,minute)<ipchunJd(y);}
+// 일주: 1900-01-01=갑술(index10)
+const ANCHOR=Date.UTC(1900,0,1);
+function dayIndex(y,m,d){const diff=Math.round((Date.UTC(y,m-1,d)-ANCHOR)/86400000);return ((10+diff)%60+60)%60;}
+function pillarStr(gi,ji){return GAN[gi]+JI[ji];}
+function yearPillar(y,m,d,h,mi){const yy=beforeIpchun(y,m,d,h,mi)?y-1:y;return {gi:((yy-4)%10+10)%10,ji:((yy-4)%12+12)%12,yy};}
+function monthPillar(y,m,d,h,mi){const br=monthBranch(y,m,d,h,mi);const {yy}=yearPillar(y,m,d,h,mi);const yg=((yy-4)%10+10)%10;const inGan=((yg%5)*2+2)%10;const order=['인','묘','진','사','오','미','신','유','술','해','자','축'];const step=order.indexOf(br);return {gi:(inGan+step)%10,ji:JI.indexOf(br)};}
+function dayPillar(y,m,d){const idx=dayIndex(y,m,d);return {gi:idx%10,ji:idx%12};}
+function hourPillar(dayGi,hour){if(hour==null)return null;const jiIdx=Math.floor(((hour+1)/2))%12;const jaGan=((dayGi%5)*2)%10;return {gi:(jaGan+jiIdx)%10,ji:jiIdx};}
+// --- 정밀 보정 (진태양시·서머타임·야자시) ---
+const CITY_LON={'서울':126.98,'인천':126.71,'수원':127.03,'춘천':127.73,'강릉':128.90,
+  '대전':127.38,'세종':127.29,'청주':127.49,'전주':127.15,'광주':126.85,'목포':126.39,
+  '대구':128.60,'부산':129.08,'울산':129.31,'창원':128.68,'제주':126.53,'개성/평양':125.9};
+// 균시차(분): 겉보기-평균 태양시
+function equationOfTime(y,m,d){const N=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(y,0,0))/86400000);const B=2*Math.PI*(N-81)/365;return 9.87*Math.sin(2*B)-7.53*Math.cos(B)-1.5*Math.sin(B);}
+// 대한민국 서머타임 시행 구간(양력 대략)
+const DST_RANGES=[[[1948,5,31],[1948,9,13]],[[1949,4,3],[1949,9,11]],[[1950,4,1],[1950,9,10]],[[1951,5,6],[1951,9,9]],[[1955,5,5],[1955,9,9]],[[1956,5,20],[1956,9,30]],[[1957,5,5],[1957,9,22]],[[1958,5,4],[1958,9,21]],[[1959,5,3],[1959,9,20]],[[1960,5,1],[1960,9,18]],[[1987,5,10],[1987,10,11]],[[1988,5,8],[1988,10,9]]];
+function isKoreanDST(y,m,d){const t=Date.UTC(y,m-1,d);for(const [a,b] of DST_RANGES){if(t>=Date.UTC(a[0],a[1]-1,a[2])&&t<Date.UTC(b[0],b[1]-1,b[2]))return true;}return false;}
+function addMinutes(y,m,d,total){const base=Date.UTC(y,m-1,d);const off=Math.floor(total/1440);const mm=total-off*1440;const nd=new Date(base+off*86400000);return {y:nd.getUTCFullYear(),m:nd.getUTCMonth()+1,d:nd.getUTCDate(),hour:Math.floor(mm/60),minute:Math.round(mm%60)};}
+
+function computeSaju(y,m,d,hour,opts){
+  opts=Object.assign({lon:135,precise:false,nightZi:false},opts||{});
+  const known=hour!=null;
+  const clockMin=(known?hour:12)*60;
+  const dstAdj=(opts.precise&&isKoreanDST(y,m,d))?-60:0;
+  // (1) 물리적 시각(절기=년·월주용): 서머타임만 보정
+  const phys=addMinutes(y,m,d,clockMin+dstAdj);
+  // (2) 지방진태양시(시주·일주경계용): +경도보정 +균시차
+  const solAdj=opts.precise?((opts.lon-135)*4+equationOfTime(y,m,d)):0;
+  const sol=addMinutes(y,m,d,clockMin+dstAdj+solAdj);
+  // 야자시: 23시 이후를 다음날 일주로
+  let dayD={y:sol.y,m:sol.m,d:sol.d};
+  if(known&&opts.nightZi&&sol.hour>=23)dayD=addMinutes(sol.y,sol.m,sol.d,24*60);
+  const yp=yearPillar(phys.y,phys.m,phys.d,phys.hour,phys.minute);
+  const mp=monthPillar(phys.y,phys.m,phys.d,phys.hour,phys.minute);
+  const dp=dayPillar(dayD.y,dayD.m,dayD.d);
+  const hp=known?hourPillar(dp.gi,sol.hour):null;
+  const pillars={년주:pillarStr(yp.gi,yp.ji),월주:pillarStr(mp.gi,mp.ji),일주:pillarStr(dp.gi,dp.ji)};
+  if(hp)pillars['시주']=pillarStr(hp.gi,hp.ji);
+  const oc={목:0,화:0,토:0,금:0,수:0};
+  [yp,mp,dp,hp].forEach(p=>{if(!p)return;oc[GAN_OH[p.gi]]++;oc[JI_OH[JI[p.ji]]]++;});
+  return {pillars,ilgan:GAN[dp.gi],oheng:oc,dp,raw:{yp,mp,dp,hp},
+    solarTime:known?`${String(sol.hour).padStart(2,'0')}:${String(sol.minute).padStart(2,'0')}`:null};}
+// 음력->양력
+function lunarToSolar(y,m,d,leap){const arr=DATA.lunar[y];if(!arr)throw '지원 범위(1930~2026) 밖입니다';
+  const base=Date.UTC(1900,0,1);const row=arr.find(r=>r[0]===m&&r[1]===(leap?1:0));
+  if(!row)throw '해당 음력 월이 없습니다'+(leap?' (윤달 아님)':'');
+  const dt=new Date(base+(row[2]+(d-1))*86400000);return [dt.getUTCFullYear(),dt.getUTCMonth()+1,dt.getUTCDate()];}
+// 오행수리
+const DIGIT_OH={1:'수',6:'수',2:'화',7:'화',3:'목',8:'목',4:'금',9:'금',5:'토',0:'토'};
+function numOheng(n){return DIGIT_OH[n%10];}
+// 결정적 RNG (mulberry32)
+function hashStr(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19;}return h>>>0;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function sajuRecommend(by,bm,bd,hour,drawDate,opts){
+  const saju=computeSaju(by,bm,bd,hour,opts);
+  const dp=dayPillar(drawDate.y,drawDate.m,drawDate.d);
+  const drawGanOh=GAN_OH[dp.gi],drawJiOh=JI_OH[JI[dp.ji]];
+  const oc=saju.oheng,mx=Math.max(...Object.values(oc));
+  const wOh={};['목','화','토','금','수'].forEach(o=>{let base=(mx-oc[o])+1;if(o===drawGanOh)base+=2;if(o===drawJiOh)base+=1;wOh[o]=base;});
+  const nw={};NUMS.forEach(n=>nw[n]=wOh[numOheng(n)]);
+  const seedStr=Object.values(saju.pillars).join('')+`${drawDate.y}-${drawDate.m}-${drawDate.d}`;
+  const rng=mulberry32(hashStr(seedStr));
+  const pool=[...NUMS],chosen=[];
+  const wcopy={...nw};
+  for(let k=0;k<6;k++){let tot=0;pool.forEach(n=>{if(wcopy[n]!=null)tot+=wcopy[n];});let r=rng()*tot;for(const n of pool){if(wcopy[n]==null)continue;r-=wcopy[n];if(r<=0){chosen.push(n);delete wcopy[n];break;}}}
+  chosen.sort((a,b)=>a-b);
+  // 용신 근사: 가중치가 가장 큰(가장 필요한) 오행
+  const yongsin=Object.entries(wOh).sort((a,b)=>b[1]-a[1])[0][0];
+  return {saju,numbers:chosen,drawIljin:pillarStr(dp.gi,dp.ji),wOh,
+    drawGanOh,drawJiOh,yongsin};
+}
+
+// ====================== 사주 풀이(해석) ======================
+const GAN_NATURE={
+  갑:['큰 나무(甲木)','곧고 진취적입니다. 리더십과 뚝심, 명예를 중시하며 한번 정하면 밀고 나가는 대들보형이에요.'],
+  을:['화초·덩굴(乙木)','부드럽고 유연합니다. 섬세한 처세와 뛰어난 적응력, 은근한 끈기가 강점이에요.'],
+  병:['태양(丙火)','밝고 정열적입니다. 표현력과 추진력이 좋고 사람을 끌어당기는 화통함이 있어요.'],
+  정:['등불·달빛(丁火)','따뜻하고 섬세합니다. 은근한 헌신과 집중력, 속 깊은 배려가 매력이에요.'],
+  무:['큰 산·대지(戊土)','듬직하고 포용력이 큽니다. 중심을 잡아주는 신뢰와 안정감이 강점이에요.'],
+  기:['옥토·정원(己土)','온화하고 실속 있습니다. 꼼꼼한 관리와 현실 감각이 뛰어나요.'],
+  경:['강철·원석(庚金)','강직하고 결단력이 있습니다. 의리와 추진력, 승부욕이 돋보여요.'],
+  신:['보석·예도(辛金)','예리하고 세련됐습니다. 완성도와 자존심, 뛰어난 심미안을 지녔어요.'],
+  임:['바다·큰물(壬水)','지혜롭고 포용력이 큽니다. 활동적이고 스케일이 큰 사람이에요.'],
+  계:['이슬·시냇물(癸水)','총명하고 섬세합니다. 감성과 상상력, 유연한 소통이 강점이에요.'],
+};
+const OHENG_INFO={
+  목:{kw:'성장·명예·교육·인정',much:'추진력과 성장 욕구가 강해요. 고집을 조금 눌러 유연함을 곁들이면 더 좋습니다.',lack:'새로운 시작과 성장·의욕'},
+  화:{kw:'열정·표현·화려함·예술',much:'표현력과 활기가 넘쳐요. 감정 기복만 다스리면 매력이 빛납니다.',lack:'열정과 표현·활력'},
+  토:{kw:'안정·신용·중재·부동산',much:'믿음직하고 중심이 있어요. 변화에 조금 더 열리면 좋습니다.',lack:'안정과 신용·중심'},
+  금:{kw:'결단·재물·의리·규율',much:'결단력과 원칙이 강해요. 부드러움을 더하면 관계가 편해집니다.',lack:'결단과 마무리·재물'},
+  수:{kw:'지혜·유연·소통·이동',much:'생각이 깊고 유연해요. 실행력을 더하면 더욱 좋습니다.',lack:'지혜와 유연함·소통'},
+};
+const OHENG_DIR={
+  목:{dir:'동(東)쪽',regions:['강원','경북','대구','울산']},
+  화:{dir:'남(南)쪽',regions:['부산','경남','전남','광주','제주']},
+  토:{dir:'중앙(中)',regions:['대전','세종','충북','충남']},
+  금:{dir:'서(西)쪽',regions:['인천','전북']},
+  수:{dir:'북(北)쪽',regions:['서울','경기']},
+};
+const OH_GEN={목:'화',화:'토',토:'금',금:'수',수:'목'};   // 생(生)
+const OH_CTL={목:'토',토:'수',수:'화',화:'금',금:'목'};   // 극(剋)
+function relation(P,D){
+  if(OH_GEN[D]===P)return['인성(도움운)','이번 회차의 기운이 당신을 북돋아 줍니다. 주변의 도움과 귀인의 기운이 따르는 흐름이에요.'];
+  if(OH_GEN[P]===D)return['식상(표현운)','당신의 기운을 밖으로 펼치는 흐름입니다. 즐겁게 도전하면 좋은 날이에요.'];
+  if(OH_CTL[P]===D)return['재성(재물운)','재물의 기운과 맞닿는 흐름! 로또 같은 재미엔 반가운 상징이에요.'];
+  if(OH_CTL[D]===P)return['관성(절제운)','절제와 신중함이 어울리는 흐름이에요. 큰 기대보다 가벼운 재미로 즐기세요.'];
+  return['비겁(협력운)','나와 같은 기운이 겹치는 날이에요. 경쟁 속 협력과 동료의 기운이 함께합니다.'];
+}
+// --- 십신(十神) ---
+const BRANCH_MAIN={자:'계',축:'기',인:'갑',묘:'을',진:'무',사:'병',오:'정',미:'기',신:'경',유:'신',술:'무',해:'임'};
+function tenGodStem(dayGi,tGi){const dOh=GAN_OH[dayGi],tOh=GAN_OH[tGi],same=(dayGi%2)===(tGi%2);
+  if(dOh===tOh)return same?'비견':'겁재';
+  if(OH_GEN[dOh]===tOh)return same?'식신':'상관';
+  if(OH_CTL[dOh]===tOh)return same?'편재':'정재';
+  if(OH_CTL[tOh]===dOh)return same?'편관':'정관';
+  return same?'편인':'정인';}
+function tenGodBranch(dayGi,ji){return tenGodStem(dayGi,GAN.indexOf(BRANCH_MAIN[ji]));}
+const SIPSIN_GROUP={비견:'비겁',겁재:'비겁',식신:'식상',상관:'식상',편재:'재성',정재:'재성',편관:'관성',정관:'관성',편인:'인성',정인:'인성'};
+const GROUP_INFO={
+  비겁:'자기 주관과 독립심이 강합니다. 경쟁력과 추진력이 좋지만 고집·독단은 조심하면 좋아요.',
+  식상:'표현력과 재능, 활동성이 돋보입니다. 아이디어를 밖으로 펼치고 즐기는 기운이에요.',
+  재성:'재물 감각과 현실 감각이 뛰어납니다. 실리를 챙기고 성과를 만드는 기운이에요.',
+  관성:'책임감과 명예욕, 조직 적응력이 좋습니다. 규율과 자기관리가 강점이에요.',
+  인성:'학문·수용력과 보호받는 기운이 강합니다. 배우고 정리하며 내실을 다지는 힘이에요.',
+};
+// --- 십이운성(十二運星) ---
+const STAGE=['장생','목욕','관대','건록','제왕','쇠','병','사','묘','절','태','양'];
+const JI_ORD=['자','축','인','묘','진','사','오','미','신','유','술','해'];
+const JANGSAENG={갑:'해',병:'인',무:'인',경:'사',임:'신',을:'오',정:'유',기:'유',신:'자',계:'묘'};
+function twelveStage(dayGan,ji){const start=JI_ORD.indexOf(JANGSAENG[dayGan]);const yang=GAN.indexOf(dayGan)%2===0;const pos=JI_ORD.indexOf(ji);const steps=yang?((pos-start+12)%12):((start-pos+12)%12);return STAGE[steps];}
+const STAGE_INFO={
+  장생:'새싹처럼 시작하는 기운. 순수하고 성장 가능성이 큽니다.',목욕:'다듬어지는 시기. 변화가 많고 감수성이 예민합니다.',
+  관대:'독립하는 기운. 자기 색이 뚜렷하고 진취적입니다.',건록:'자립과 왕성함. 능력을 스스로 펼치는 힘이 강합니다.',
+  제왕:'기운이 최고조. 강하고 주도적이며 리더십이 있습니다.',쇠:'노련하고 안정된 기운. 신중하고 내실을 챙깁니다.',
+  병:'예민하고 섬세한 기운. 배려심이 깊고 휴식이 필요합니다.',사:'사색하는 기운. 조용히 파고들고 정신적입니다.',
+  묘:'갈무리하는 기운. 내향적이고 알뜰합니다.',절:'끊고 전환하는 기운. 변화가 크고 결단이 필요합니다.',
+  태:'잉태·준비하는 기운. 새로운 가능성을 품습니다.',양:'보살핌 속 성장하는 기운. 온화하고 뒷심이 있습니다.',
+};
+// --- 납음(納音)·공망(空亡) (lunar-python 정통표에서 추출·교차검증) ---
+const NAYIN={"갑자":"해중금","갑오":"사중금","병인":"노중화","병신":"산하화","무진":"대림목","무술":"평지목","경오":"노방토","경자":"벽상토","임신":"검봉금","임인":"금박금","갑술":"산두화","갑진":"복등화","병자":"간하수","병오":"천하수","무인":"성두토","무신":"대역토","경진":"백랍금","경술":"채천금","임오":"양류목","임자":"상자목","갑신":"천중수","갑인":"대계수","병술":"옥상토","병진":"사중토","무자":"벽력화","무오":"천상화","경인":"송백목","경신":"석류목","임진":"장류수","임술":"대해수","을축":"해중금","을미":"사중금","정묘":"노중화","정유":"산하화","기사":"대림목","기해":"평지목","신미":"노방토","신축":"벽상토","계유":"검봉금","계묘":"금박금","을해":"산두화","을사":"복등화","정축":"간하수","정미":"천하수","기묘":"성두토","기유":"대역토","신사":"백랍금","신해":"채천금","계미":"양류목","계축":"상자목","을유":"천중수","을묘":"대계수","정해":"옥상토","정사":"사중토","기축":"벽력화","기미":"천상화","신묘":"송백목","신유":"석류목","계사":"장류수","계해":"대해수"};
+function nayinOf(p){return NAYIN[p]||'';}
+function gongmang(p){const g=GAN.indexOf(p[0]),z=JI.indexOf(p[1]),base=((z-g)%12+12)%12;return [JI[(base+10)%12],JI[(base+11)%12]];}
+function sajuReadingHtml(r){
+  const ilgan=r.saju.ilgan, P=GAN_OH[GAN.indexOf(ilgan)], D=r.drawGanOh;
+  const nat=GAN_NATURE[ilgan], rel=relation(P,D), oc=r.saju.oheng, ys=r.yongsin;
+  const lacks=Object.keys(oc).filter(o=>oc[o]===0);
+  const muchs=Object.keys(oc).filter(o=>oc[o]>=3);
+  // 십신(十神) 집계
+  const raw=r.saju.raw, dayGi=raw.dp.gi, dayGan=ilgan;
+  const gcount={비겁:0,식상:0,재성:0,관성:0,인성:0};
+  [raw.yp,raw.mp,raw.hp].forEach(p=>{if(p)gcount[SIPSIN_GROUP[tenGodStem(dayGi,p.gi)]]++;});
+  [raw.yp,raw.mp,raw.dp,raw.hp].forEach(p=>{if(p)gcount[SIPSIN_GROUP[tenGodBranch(dayGi,JI[p.ji])]]++;});
+  const domGroup=Object.entries(gcount).sort((a,b)=>b[1]-a[1])[0][0];
+  const sipsinText=`가장 두드러진 기운은 <b>${domGroup}</b>이에요. ${GROUP_INFO[domGroup]}`;
+  const sipsinTags=Object.entries(gcount).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span class="tag">${k} ${v}</span>`).join(' ');
+  // 십이운성(十二運星)
+  const stages=[['년지',raw.yp.ji],['월지',raw.mp.ji],['일지',raw.dp.ji]];
+  if(raw.hp)stages.push(['시지',raw.hp.ji]);
+  const dayStage=twelveStage(dayGan,JI[raw.dp.ji]);
+  const stageTags=stages.map(([lbl,ji])=>`<span class="tag">${lbl} ${JI[ji]}·${twelveStage(dayGan,JI[ji])}</span>`).join(' ');
+  // 납음·공망
+  const ju=r.saju.pillars['일주'], gm=gongmang(ju);
+  const nayinTags=['년주','월주','일주','시주'].filter(k=>r.saju.pillars[k]).map(k=>`<span class="tag">${k[0]} ${r.saju.pillars[k]}·${nayinOf(r.saju.pillars[k])}</span>`).join(' ');
+  // 오행 분석 문장
+  let ohText='';
+  if(muchs.length)ohText+=`<b class="oh-${muchs[0]}">${muchs.join('·')}</b> 기운이 강합니다. ${OHENG_INFO[muchs[0]].much}<br>`;
+  if(lacks.length)ohText+=`<b class="oh-${lacks[0]}">${lacks.join('·')}</b> 기운이 부족합니다. 그래서 <b>${lacks.map(o=>OHENG_INFO[o].lack).join(', ')}</b>의 기운을 채워주는 것이 좋아요.`;
+  else ohText+='오행이 비교적 고르게 분포해 균형이 좋은 사주예요.';
+  // 번호 이유
+  const reason=`당신에게 가장 필요한 기운은 <b class="oh-${ys}">${ys}(${OHENG_INFO[ys].kw})</b>입니다. 이 기운을 채워주는 <b>오행수리(끝자리)</b> 번호에 무게를 두고, 이번 추첨일 <b>${r.drawIljin}</b>의 <b class="oh-${D}">${D}</b> 기운을 더해 6개를 골랐습니다.`;
+  // 방위·지역
+  const dinfo=OHENG_DIR[ys];
+  const regs=dinfo.regions.map(rg=>[rg,(DATA.regionStats&&DATA.regionStats[rg])||0]).sort((a,b)=>b[1]-a[1]);
+  const best=regs[0], top=DATA.regionTop&&DATA.regionTop[best[0]]&&DATA.regionTop[best[0]][0];
+  const regionHtml=`
+    <div class="mini" style="text-align:left">
+      <div class="big" style="font-size:20px">🧭 ${dinfo.dir}</div>
+      <div class="muted" style="margin:4px 0">${ys} 기운을 채우기 좋은 방향이에요.</div>
+      <div>추천 지역: ${dinfo.regions.map(rg=>`<span class="tag">${rg}</span>`).join(' ')}</div>
+      <div style="margin-top:8px">이 중 <b>${best[0]}</b>에서 1등이 가장 많이 나왔어요 (<b>${best[1]}회</b>)${top?`, 대표 명당은 <b>${top[0]}</b>(${top[1]}회)`:''}.</div>
+    </div>`;
+  return `<div class="card"><h2>📖 사주 풀이</h2>
+    <h3>나는 어떤 사람? <span class="muted" style="font-size:12px">(일간 ${ilgan})</span></h3>
+    <p><b>${nat[0]}</b> — ${nat[1]}</p>
+    <h3>🌿 오행 분석</h3><p>${ohText}</p>
+    <h3>🀄 십신(十神) 분석</h3><p>${sipsinText}</p><div class="row" style="gap:6px;margin-top:6px">${sipsinTags}</div>
+    <h3>🌀 십이운성 <span class="muted" style="font-size:12px">(일지 ${JI[raw.dp.ji]}·${dayStage})</span></h3>
+    <p>${STAGE_INFO[dayStage]}</p><div class="row" style="gap:6px;margin-top:6px">${stageTags}</div>
+    <h3>🎐 납음(納音)·공망(空亡)</h3>
+    <p>일주 <b>${ju}</b> = <b>${nayinOf(ju)}</b> · 공망 <b>${gm[0]}·${gm[1]}</b> <span class="muted" style="font-size:12px">(비어서 채움이 필요한 자리)</span></p>
+    <div class="row" style="gap:6px;margin-top:6px">${nayinTags}</div>
+    <h3>🔮 이번 회차 운세 <span class="tag" style="margin-left:4px">${rel[0]}</span></h3>
+    <p>${rel[1]}</p>
+    <h3>🎯 왜 이 번호인가</h3><p>${reason}</p>
+    <h3>🧭 행운의 방위 · 지역</h3>${regionHtml}
+    <p class="muted" style="font-size:12px;margin-top:10px">※ 명리학을 응용한 재미용 해석입니다. 지역 통계는 인구·판매량이 많은 곳일수록 당첨도 많이 나오는 점을 감안해 재미로 봐주세요.</p>
+  </div>`;
+}
+
+// ====================== 백테스트 ======================
+function grade(pred,actual,bonus){const set=new Set(actual);let m=0;pred.forEach(n=>{if(set.has(n))m++;});
+  let rank=0;if(m===6)rank=1;else if(m===5&&pred.includes(bonus))rank=2;else if(m===5)rank=3;else if(m===4)rank=4;else if(m===3)rank=5;return [m,rank];}
+function backtest(n){
+  const N=Math.min(n,draws.length-10);const res={};Object.keys(STRATS).forEach(k=>res[k]={match:0,cnt:0,win5:0});
+  // 인덱스: 각 타깃 회차 이전 데이터로 예측 (여기선 전체 통계 기반 근사 — 브라우저 속도 위해 현 STRATS 사용)
+  const targets=draws.slice(-N);
+  targets.forEach(row=>{const actual=row.slice(2,8),bonus=row[8];
+    for(const k in STRATS){const nums=STRATS[k][2]();const [m,rk]=grade(nums,actual,bonus);res[k].match+=m;res[k].cnt++;if(rk>=1&&rk<=5)res[k].win5++;}});
+  return Object.keys(STRATS).map(k=>({name:STRATS[k][0],desc:STRATS[k][1],avg:Math.round(res[k].match/res[k].cnt*1000)/1000,win5:Math.round(res[k].win5/res[k].cnt*10000)/100})).sort((a,b)=>b.avg-a.avg);
+}
+
+// ====================== 렌더링 ======================
+function nextSaturday(){const t=new Date();const ahead=(6-t.getDay()+7)%7;t.setDate(t.getDate()+ahead);return t;}
+function isoDate(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
+
+function renderHome(){const L=draws[draws.length-1];const nums=L.slice(2,8),bonus=L[8];
+  el('home').innerHTML=`
+  <div class="card hero"><h1>🍀 행운로또</h1><p>1회차부터 최신까지의 데이터로 보는 통계·패턴·사주 번호</p></div>
+  <div class="card"><h2>🎯 최신 당첨번호 · ${L[0]}회 <span class="muted" style="font-size:13px">(${L[1]})</span></h2>
+    <div class="balls">${nums.map(n=>ball(n)).join('')}<div class="plus">+</div>${ball(bonus)}</div>
+    <div class="grid" style="margin-top:16px">
+      <div class="mini"><div class="muted">1등 당첨자</div><div class="big">${L[9]}명</div></div>
+      <div class="mini"><div class="muted">1등 1인당</div><div class="big">${Math.floor(L[10]/100000000)}억</div></div>
+      <div class="mini"><div class="muted">총 판매액</div><div class="big">${Math.floor(L[11]/100000000)}억</div></div>
+    </div></div>
+  <div class="card"><h2>무엇을 해볼까요?</h2><div class="grid">
+    <a class="mini" onclick="go('stats')"><div class="big">📊</div>패턴 통계</a>
+    <a class="mini" onclick="go('rec')"><div class="big">🎲</div>패턴별 추천</a>
+    <a class="mini" onclick="go('saju')"><div class="big">🔮</div>사주로 뽑기</a>
+    <a class="mini" onclick="go('stores')"><div class="big">🏪</div>명당 랭킹</a>
+    <a class="mini" onclick="go('predict')"><div class="big">🎯</div>성공률 검증</a>
+  </div></div>`;}
+
+function renderStats(){const s=computeStats();
+  const sorted=Object.entries(s.freq).map(([n,c])=>[+n,c]).sort((a,b)=>b[1]-a[1]);
+  const hot=sorted.slice(0,8),cold=sorted.slice(-8);
+  const recent=Object.entries(s.recent).map(([n,c])=>[+n,c]).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const gap=Object.entries(s.gap).map(([n,c])=>[+n,c]).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const fmax=Math.max(...Object.values(s.freq));
+  const oeTop=Object.entries(s.oe).sort((a,b)=>b[1]-a[1]).slice(0,1)[0];
+  const g=(arr,suf)=>arr.map(([n,c])=>`<div style="text-align:center">${ball(n)}<div class="ball-oh">${c}${suf}</div></div>`).join('');
+  el('stats').innerHTML=`
+  <div class="card"><h2>📊 패턴 통계 <span class="muted" style="font-size:13px">(1~${s.newest}회, 총 ${s.total}회)</span></h2>
+    <h3>🔥 최다 출현</h3><div class="balls">${g(hot,'회')}</div>
+    <h3>❄️ 최소 출현</h3><div class="balls">${g(cold,'회')}</div>
+    <h3>⏳ 오래 안 나온 번호</h3><div class="balls">${g(gap,'회전')}</div>
+    <h3>⚡ 최근 50회 핫넘버</h3><div class="balls">${g(recent,'회')}</div></div>
+  <div class="card"><h2>번호별 전체 빈도</h2>${NUMS.map(n=>`<div class="freqrow"><span class="n">${n}</span><div class="bar" style="width:${s.freq[n]/fmax*100}%"></div><span class="muted">${s.freq[n]}</span></div>`).join('')}</div>
+  <div class="card"><h2>구성 패턴</h2><div class="grid">
+    <div class="mini"><div class="muted">홀짝 최빈</div><div class="big">${oeTop[0]}</div>홀:짝</div>
+    <div class="mini"><div class="muted">합계 평균</div><div class="big">${s.avg}</div>${s.sumMin}~${s.sumMax}</div>
+    <div class="mini"><div class="muted">연속번호 포함</div><div class="big">${Math.round(s.consec/s.total*1000)/10}%</div></div>
+  </div><h3>궁합수 Top10</h3><div class="row" style="gap:8px">${s.pairs.map(p=>`<span class="tag">${p[0][0]} & ${p[0][1]} · ${p[1]}회</span>`).join('')}</div></div>`;}
+
+function renderRec(){el('rec').innerHTML=`<div class="card"><h2>🎲 패턴별 번호 추천</h2>
+  <p class="muted">${Object.keys(STRATS).length}가지 전략으로 뽑은 번호입니다. 버튼으로 세트를 더 받아보세요.</p>
+  ${Object.entries(STRATS).map(([k,v])=>`<div class="strat"><div class="name">${v[0]} <span class="muted" style="font-weight:400">— ${v[1]}</span></div>
+    <div id="first-${k}">${ballsRow(v[2](),true)}</div>
+    <button class="btn ghost" style="font-size:13px;padding:6px 14px" onclick="moreRec('${k}')">+ 5세트 더</button>
+    <div id="more-${k}"></div></div>`).join('')}</div>`;}
+function moreRec(k){el('more-'+k).innerHTML=Array.from({length:5},()=>ballsRow(STRATS[k][2](),true)).join('');}
+
+function renderSaju(){const def=isoDate(nextSaturday());
+  el('saju').innerHTML=`<div class="card"><h2>🔮 사주(명리학) 기반 추천</h2>
+  <p class="muted">생년월일시로 사주팔자를 계산하고, 부족한 오행과 추첨일의 기운을 반영해 번호를 뽑습니다.</p>
+  <label>달력</label><div>
+    <span class="radio"><input type="radio" name="cal" value="solar" checked> 양력</span>
+    <span class="radio"><input type="radio" name="cal" value="lunar"> 음력</span>
+    <span class="radio"><input type="checkbox" id="leap"> 윤달(음력만)</span></div>
+  <div class="row">
+    <div><label>년</label><select id="by">${yearOpts()}</select></div>
+    <div><label>월</label><select id="bm">${numOpts(1,12)}</select></div>
+    <div><label>일</label><select id="bd">${numOpts(1,31)}</select></div></div>
+  <div class="row">
+    <div><label>태어난 시각</label><select id="bh">${hourOpts()}</select></div>
+    <div><label>추첨일</label><input type="date" id="dd" value="${def}"></div></div>
+  <div class="row">
+    <div><label>출생지역 <span class="muted" style="font-size:11px">(진태양시 보정)</span></label><select id="city">${cityOpts()}</select></div>
+  </div>
+  <div style="margin-top:8px;font-size:13px">
+    <span class="radio"><input type="checkbox" id="precise" checked> 정밀보정(진태양시·서머타임)</span>
+    <span class="radio"><input type="checkbox" id="nightzi"> 야자시(23시 이후 다음날)</span>
+  </div>
+  <div style="margin-top:16px"><button class="btn" onclick="doSaju()">🔮 내 번호 뽑기</button></div></div>
+  <div id="sajuResult"></div>`;}
+function cityOpts(){return Object.keys(CITY_LON).map(c=>`<option value="${c}" ${c==='서울'?'selected':''}>${c}</option>`).join('')+'<option value="__std">보정 안 함(표준시 135°)</option>';}
+function yearOpts(){let s='';for(let y=2026;y>=1930;y--)s+=`<option value="${y}" ${y===1990?'selected':''}>${y}</option>`;return s;}
+function numOpts(a,b){let s='';for(let i=a;i<=b;i++)s+=`<option value="${i}">${i}</option>`;return s;}
+function hourOpts(){const ji=['자(23~01)','축(01~03)','인(03~05)','묘(05~07)','진(07~09)','사(09~11)','오(11~13)','미(13~15)','신(15~17)','유(17~19)','술(19~21)','해(21~23)'];let s='<option value="unknown">모름</option>';for(let h=0;h<24;h++)s+=`<option value="${h}">${String(h).padStart(2,'0')}시 · ${ji[Math.floor((h+1)/2)%12]}</option>`;return s;}
+function doSaju(){try{
+  const cal=document.querySelector('input[name=cal]:checked').value;
+  const leap=el('leap').checked;let y=+el('by').value,m=+el('bm').value,d=+el('bd').value;
+  if(cal==='lunar'){[y,m,d]=lunarToSolar(y,m,d,leap);}
+  const hv=el('bh').value;const hour=hv==='unknown'?null:+hv;
+  const dv=el('dd').value.split('-').map(Number);const drawDate={y:dv[0],m:dv[1],d:dv[2]};
+  const cityV=el('city').value;const lon=cityV==='__std'?135:(CITY_LON[cityV]||135);
+  const opts={lon,precise:el('precise').checked,nightZi:el('nightzi').checked};
+  const r=sajuRecommend(y,m,d,hour,drawDate,opts);
+  const oh=r.numbers.map(n=>numOheng(n));
+  el('sajuResult').innerHTML=`<div class="card"><h2>✨ 추천 결과</h2>
+    <div class="balls">${r.numbers.map((n,i)=>`<div style="text-align:center">${ball(n)}<div class="ball-oh oh-${oh[i]}">${oh[i]}</div></div>`).join('')}</div>
+    <h3>내 사주팔자</h3><div class="row" style="gap:8px">${Object.entries(r.saju.pillars).map(([k,v])=>`<div class="mini"><div class="muted">${k}</div><div class="big" style="font-size:18px">${v}</div></div>`).join('')}</div>
+    <h3>오행 분포 <span class="muted" style="font-size:12px">(일간: ${r.saju.ilgan})</span></h3>
+    <div class="row" style="gap:8px">${Object.entries(r.saju.oheng).map(([o,c])=>`<span class="tag oh-${o}">${o} × ${c}</span>`).join('')}</div>
+    <p class="muted" style="margin-top:14px;font-size:13px">양력 기준 ${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}${r.saju.solarTime?` · 진태양시 ${r.saju.solarTime}`:''} · 추첨일 일진 <b>${r.drawIljin}</b>의 기운 반영 · 같은 조건이면 항상 같은 번호가 나옵니다.</p></div>`+sajuReadingHtml(r);
+}catch(e){el('sajuResult').innerHTML=`<div class="card"><p style="color:#ff8a8a">입력을 확인해 주세요: ${e}</p></div>`;}}
+
+function storeTable(list){return `<table><thead><tr><th>판매점</th><th>지역</th><th>주소</th><th>구분</th></tr></thead><tbody>${list.map(s=>`<tr><td><b>${s[0]||''}</b></td><td>${s[1]||''}</td><td class="muted" style="font-size:13px">${s[2]||''}</td><td>${s[3]||''}</td></tr>`).join('')}</tbody></table>`;}
+function renderStores(){const r=DATA.ranking;const have=Object.keys(DATA.storesByRound).length;
+  el('stores').innerHTML=`<div class="card"><h2>🏪 명당 랭킹 <span class="muted" style="font-size:13px">(1등 배출 Top50)</span></h2>
+  <p class="muted">수집된 ${have}개 회차 기준. (전체 수집 시 갱신됩니다)</p>
+  <table><thead><tr><th>#</th><th>판매점</th><th>지역</th><th>주소</th><th>1등</th></tr></thead><tbody>
+  ${r.slice(0,50).map((s,i)=>`<tr><td><span class="rank-badge ${i<3?'gold':''}">${i+1}</span></td><td><b>${s[0]}</b></td><td>${s[1]||''}</td><td class="muted" style="font-size:13px">${s[2]||''}</td><td><b>${s[3]}회</b></td></tr>`).join('')}
+  </tbody></table></div>
+  <div class="card"><h2>📅 회차별 당첨 판매점</h2>
+  <div class="row" style="align-items:flex-end">
+    <div style="flex:0"><button class="btn ghost" onclick="stepRound(-1)">◀</button></div>
+    <div><label>회차 (1~${LATEST_ROUND})</label><input type="number" id="rnd" min="1" max="${LATEST_ROUND}" value="${LATEST_ROUND}" onchange="showRound(+this.value)"></div>
+    <div style="flex:0"><button class="btn ghost" onclick="stepRound(1)">▶</button></div>
+    <div style="flex:0"><button class="btn" onclick="showRound(+el('rnd').value)">조회</button></div>
+  </div>
+  <div id="storeResult" style="margin-top:14px"></div></div>`;
+  showRound(LATEST_ROUND);}
+function stepRound(d){let v=(+el('rnd').value)+d;if(v<1||v>LATEST_ROUND)return;el('rnd').value=v;showRound(v);}
+function showRound(rnd){
+  const draw=DRAW_BY_ROUND[rnd];const s1=DATA.storesByRound[rnd];
+  const s2=DATA.storesByRound2&&DATA.storesByRound2[rnd];
+  let html='';
+  if(draw){html+=`<div style="margin-bottom:6px" class="muted">${rnd}회 당첨번호 (${draw[1]})</div><div class="balls" style="justify-content:flex-start">${draw.slice(2,8).map(n=>ball(n,true)).join('')}<div class="plus" style="font-size:16px">+</div>${ball(draw[8],true)}</div>`;}
+  if(s1){html+=`<h3>🥇 1등 배출점 (${s1.length}개)</h3>${storeTable(s1)}`;}
+  else{html+=`<h3>🥇 1등 배출점</h3><p class="muted">이 회차 판매점 데이터가 아직 수집되지 않았습니다.</p>`;}
+  if(s2){html+=`<h3>🥈 2등 배출점 (${s2.length}개)</h3>${storeTable(s2)}`;}
+  else if(s1){html+=`<p class="muted" style="font-size:12px;margin-top:8px">※ 2등 배출점은 최근 회차만 포함되어 있어요.</p>`;}
+  el('storeResult').innerHTML=html;}
+
+function renderPredict(n){n=n||100;const bt=backtest(n);
+  el('predict').innerHTML=`<div class="card"><h2>🎯 전략별 예측 성공률 (백테스트)</h2>
+  <p class="muted">최근 <b>${n}회차</b> 실제 결과와 각 전략의 예측을 비교한 결과입니다.</p>
+  <table><thead><tr><th>#</th><th>전략</th><th>평균 맞춘 개수</th><th>5등이상률</th></tr></thead><tbody>
+  ${bt.map((r,i)=>`<tr><td><span class="rank-badge ${i===0?'gold':''}">${i+1}</span></td><td><b>${r.name}</b> <span class="muted" style="font-size:12px">${r.desc}</span></td><td><b>${r.avg}</b>/6</td><td>${r.win5}%</td></tr>`).join('')}
+  </tbody></table>
+  <div class="row" style="margin-top:14px;gap:8px"><button class="btn ghost" onclick="renderPredict(50)">최근50</button><button class="btn ghost" onclick="renderPredict(100)">최근100</button><button class="btn ghost" onclick="renderPredict(300)">최근300</button></div></div>
+  <div class="card"><h3>💡 이 결과가 알려주는 것</h3><p class="muted">무작위로 뽑아도 평균 <b>약 0.80개</b>는 맞습니다. 어떤 전략이든 이 값 근처가 정상이며, 통계로 당첨 확률을 높이는 건 불가능합니다. 이 서비스는 <b>재미</b>를 위한 것입니다.</p></div>`;}
+
+// ====================== 탭 전환 ======================
+const rendered={};
+function go(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('#nav a').forEach(x=>x.classList.toggle('active',x.dataset.p===p));
+  el(p).classList.add('active');window.scrollTo(0,0);
+  if(!rendered[p]){({home:renderHome,stats:renderStats,rec:renderRec,saju:renderSaju,stores:renderStores,predict:()=>renderPredict(100)}[p])();rendered[p]=true;}
+}
+document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.p));
+renderHome();rendered.home=true;
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+requests>=2.31.0
+flask>=3.0.0
+korean_lunar_calendar>=0.3.1
+lunar-python>=1.4.0   # 사주 엔진 교차검증용(saju/verify_engine.py). 앱 실행엔 불필요

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set active='rec' %}
+{% block title %}패턴별 추천{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>🎲 패턴별 번호 추천</h2>
+  <p class="muted">5가지 전략으로 뽑은 번호입니다. 각 전략을 눌러 여러 세트를 더 받아보세요.</p>
+
+  {% for name, s in sets.items() %}
+  <div class="strat">
+    <div class="name">{{ name }} <span class="muted" style="font-weight:400">— {{ s.desc }}</span></div>
+    <div class="balls" style="justify-content:flex-start" id="first-{{ name }}">
+      {% for n in s.nums %}{{ ball(n, true) }}{% endfor %}
+    </div>
+    <button class="btn ghost" style="font-size:13px;padding:6px 14px"
+            onclick="more('{{ name }}')">+ 이 전략으로 5세트 더</button>
+    <div id="more-{{ name }}"></div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+function ballHtml(n){
+  var c = n<=10?'b1':n<=20?'b2':n<=30?'b3':n<=40?'b4':'b5';
+  return '<div class="ball '+c+' sm">'+n+'</div>';
+}
+async function more(strategy){
+  var box = document.getElementById('more-'+strategy);
+  box.innerHTML = '<p class="muted">뽑는 중…</p>';
+  var res = await fetch('/api/recommend?strategy='+strategy+'&count=5');
+  var data = await res.json();
+  box.innerHTML = data.sets.map(function(set){
+    return '<div class="balls" style="justify-content:flex-start">'
+      + set.map(ballHtml).join('') + '</div>';
+  }).join('');
+}
+</script>
+
+{% endblock %}

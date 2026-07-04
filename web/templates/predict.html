@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% set active='predict' %}
+{% block title %}예측 성공률{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>🎯 전략별 예측 성공률 (백테스트)</h2>
+  <p class="muted">
+    최근 <b>{{ n }}회차</b>에 대해 "그 이전 데이터만"으로 각 전략이 번호를 예측했다면
+    실제와 몇 개나 맞았을지 계산한 결과입니다.
+  </p>
+  <table>
+    <thead><tr><th>#</th><th>전략</th><th>평균 맞춘 개수</th><th>5등 이상 확률</th></tr></thead>
+    <tbody>
+    {% for r in backtest %}
+    <tr>
+      <td><span class="rank-badge {{ 'gold' if loop.index==1 }}">{{ loop.index }}</span></td>
+      <td><b>{{ r['name'] }}</b> <span class="muted" style="font-size:12px">{{ r['desc'] }}</span></td>
+      <td><b>{{ r['avg'] }}</b> / 6</td>
+      <td>{{ r['win5'] }}%</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="row" style="margin-top:14px;gap:8px">
+    <a class="btn ghost" href="/predict?n=50">최근 50회</a>
+    <a class="btn ghost" href="/predict?n=100">최근 100회</a>
+    <a class="btn ghost" href="/predict?n=300">최근 300회</a>
+  </div>
+</div>
+
+<div class="card">
+  <h3>💡 이 결과가 알려주는 것</h3>
+  <p class="muted">
+    무작위로 6개를 뽑아도 평균 <b>약 0.80개</b>는 맞습니다. 어떤 전략이든 이 값 근처에
+    머무는 게 정상이에요. 즉 통계·패턴으로 <b>당첨 확률을 높이는 것은 불가능</b>합니다.
+    이 서비스의 추천은 <b>재미로 고르는 즐거움</b>을 위한 것입니다.
+  </p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% set active='stores' %}
+{% block title %}당첨 판매점{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>🏪 명당 랭킹 <span class="muted" style="font-size:13px">(1등 배출 횟수 Top 50)</span></h2>
+  <p class="muted">수집된 {{ have_rounds }}개 회차 기준. 데이터 수집이 진행 중이면 숫자가 계속 늘어납니다.</p>
+  <table>
+    <thead><tr><th>#</th><th>판매점</th><th>지역</th><th>주소</th><th>1등</th></tr></thead>
+    <tbody>
+    {% for r in ranking %}
+    <tr>
+      <td><span class="rank-badge {{ 'gold' if loop.index<=3 }}">{{ loop.index }}</span></td>
+      <td><b>{{ r['name'] }}</b></td>
+      <td>{{ r['region'] }}</td>
+      <td class="muted" style="font-size:13px">{{ r['address'] }}</td>
+      <td><b>{{ r['wins'] }}회</b></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>회차별 당첨 판매점 조회</h2>
+  <div class="row">
+    <div><input type="number" id="rnd" placeholder="회차 입력 (예: 1230)"></div>
+    <div style="flex:0"><button class="btn" onclick="lookup()">조회</button></div>
+  </div>
+  <div id="result" style="margin-top:14px"></div>
+</div>
+
+<script>
+async function lookup(){
+  var rnd = document.getElementById('rnd').value;
+  if(!rnd) return;
+  var box = document.getElementById('result');
+  box.innerHTML = '<p class="muted">조회 중…</p>';
+  var res = await fetch('/stores/round?round='+rnd);
+  var d = await res.json();
+  function tbl(title, list){
+    if(!list.length) return '<h3>'+title+'</h3><p class="muted">데이터 없음</p>';
+    var rows = list.map(function(s){
+      return '<tr><td><b>'+(s.name||'')+'</b></td><td>'+(s.region||'')
+        +'</td><td class="muted" style="font-size:13px">'+(s.address||'')
+        +'</td><td>'+(s.auto_type||'')+'</td></tr>';
+    }).join('');
+    return '<h3>'+title+' ('+list.length+'개점)</h3><table><thead><tr>'
+      +'<th>판매점</th><th>지역</th><th>주소</th><th>구분</th></tr></thead><tbody>'
+      +rows+'</tbody></table>';
+  }
+  box.innerHTML = '<h2 style="font-size:16px">'+d.round+'회</h2>'
+    + tbl('🥇 1등 배출점', d.rank1) + tbl('🥈 2등 배출점', d.rank2);
+}
+</script>
+
+{% endblock %}

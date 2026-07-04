@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% set active='home' %}
+{% block content %}
+
+<div class="card hero">
+  <h1>🍀 행운로또</h1>
+  <p>1회차부터 최신까지의 데이터로 보는 통계 · 패턴 · 사주 번호</p>
+</div>
+
+{% if latest %}
+<div class="card">
+  <h2>🎯 최신 당첨번호 · {{ latest['round'] }}회 <span class="muted" style="font-size:13px">({{ latest['date'] }})</span></h2>
+  <div class="balls">
+    {% for n in numbers %}{{ ball(n) }}{% endfor %}
+    <div class="plus">+</div>
+    {{ ball(latest['bonus']) }}
+  </div>
+  <div class="grid" style="margin-top:16px">
+    <div class="mini"><div class="muted">1등 당첨자</div><div class="big">{{ latest['rank1_winners'] }}명</div></div>
+    <div class="mini"><div class="muted">1등 1인당</div><div class="big">{{ '{:,}'.format(latest['rank1_prize_each']//100000000) if latest['rank1_prize_each'] else 0 }}억</div></div>
+    <div class="mini"><div class="muted">총 판매액</div><div class="big">{{ '{:,}'.format(latest['total_sales']//100000000) if latest['total_sales'] else 0 }}억</div></div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>무엇을 해볼까요?</h2>
+  <div class="grid">
+    <a class="mini" href="/stats"><div class="big">📊</div>패턴 통계 보기</a>
+    <a class="mini" href="/recommend"><div class="big">🎲</div>패턴별 번호 추천</a>
+    <a class="mini" href="/saju"><div class="big">🔮</div>사주로 번호 뽑기</a>
+    <a class="mini" href="/stores"><div class="big">🏪</div>명당 판매점 랭킹</a>
+    <a class="mini" href="/predict"><div class="big">🎯</div>전략 성공률 검증</a>
+  </div>
+</div>
+
+{% endblock %}
