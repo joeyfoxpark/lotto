@@ -14,7 +14,8 @@ a{color:inherit;text-decoration:none}
 .wrap{max-width:900px;margin:0 auto;padding:0 16px 60px}
 header{position:sticky;top:0;z-index:10;background:rgba(15,18,38,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .head-in{max-width:900px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.logo{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.logo{font-size:20px;font-weight:800;letter-spacing:-.5px;cursor:pointer}
+[onclick]{cursor:pointer}   /* 클릭 가능한 요소는 손가락 커서 */
 .logo span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
 nav{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
 nav a{padding:7px 12px;border-radius:20px;font-size:14px;color:var(--muted);border:1px solid transparent;cursor:pointer}
@@ -56,7 +57,7 @@ th{color:var(--muted);font-weight:600}tr:hover td{background:var(--card2)}
 </head>
 <body>
 <header><div class="head-in">
-  <div class="logo">🍀 <span>로또리에</span></div>
+  <div class="logo" onclick="go('home')" title="홈으로">🍀 <span>로또리에</span></div>
   <nav id="nav">
     <a data-p="home" class="active">홈</a>
     <a data-p="stats">통계</a>
@@ -504,7 +505,7 @@ function doSaju(){try{
 function storeTable(list){return `<table><thead><tr><th>판매점</th><th>지역</th><th>주소</th><th>구분</th></tr></thead><tbody>${list.map(s=>`<tr><td><b>${s[0]||''}</b></td><td>${s[1]||''}</td><td class="muted" style="font-size:13px">${s[2]||''}</td><td>${s[3]||''}</td></tr>`).join('')}</tbody></table>`;}
 function renderStores(){const r=DATA.ranking;const have=Object.keys(DATA.storesByRound).length;
   el('stores').innerHTML=`<div class="card"><h2>🏪 명당 랭킹 <span class="muted" style="font-size:13px">(1등 배출 Top50)</span></h2>
-  <p class="muted">수집된 ${have}개 회차 기준. (전체 수집 시 갱신됩니다)</p>
+  <p class="muted">262회~최신 <b>전체 회차</b> 반영 (${have}개 회차 집계). ※ 1~261회는 동행복권이 판매점을 공개하지 않아 제외됩니다.</p>
   <table><thead><tr><th>#</th><th>판매점</th><th>지역</th><th>주소</th><th>1등</th></tr></thead><tbody>
   ${r.slice(0,50).map((s,i)=>`<tr><td><span class="rank-badge ${i<3?'gold':''}">${i+1}</span></td><td><b>${s[0]}</b></td><td>${s[1]||''}</td><td class="muted" style="font-size:13px">${s[2]||''}</td><td><b>${s[3]}회</b></td></tr>`).join('')}
   </tbody></table></div>
