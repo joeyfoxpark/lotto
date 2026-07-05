@@ -3,24 +3,16 @@ name: 주간 자동 업데이트
 on:
   schedule:
     # 매주 토요일 13:00 UTC = 한국시각(KST) 토 22:00 (추첨 20:40 이후)
+    # (GitHub 사정으로 수십 분 늦게 실행될 수 있음)
     - cron: '0 13 * * 6'
   workflow_dispatch:   # 수동 실행도 가능
 
 permissions:
-  contents: write   # 갱신된 데이터 커밋
-  pages: write      # Pages 배포
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
+  contents: write   # 갱신된 데이터·사이트(docs/) 커밋 → Pages 자동 게시
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,12 +28,12 @@ jobs:
           python collector/collect_stores.py 1 1200 99999 || true
           python collector/collect_stores.py 2 1200 99999 || true
 
-      - name: 데이터 · HTML 재생성
+      - name: 데이터 · HTML(docs/) 재생성
         run: |
           python web_static/build_data.py
           python web_static/build_html.py
 
-      - name: 변경사항 커밋 & 푸시
+      - name: 변경사항 커밋 & 푸시 (→ GitHub Pages 자동 게시)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -52,15 +44,3 @@ jobs:
             git commit -m "자동 업데이트: 최신 회차 반영"
             git push
           fi
-
-      # --- Pages 배포 (GITHUB_TOKEN 커밋은 워크플로우를 재트리거하지 않으므로 여기서 직접 배포) ---
-      - name: 사이트 준비
-        run: |
-          mkdir -p _site
-          cp web_static/index.html _site/index.html
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - id: deployment
-        uses: actions/deploy-pages@v4

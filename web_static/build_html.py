@@ -15,6 +15,11 @@ out = tpl.replace(marker, f"const DATA = {data};")
 
 dest = HERE / "lotto.html"
 dest.write_text(out, encoding="utf-8")
-# GitHub Pages 진입점용 index.html 도 동일하게 생성
+# 로컬 열람용 index.html
 (HERE / "index.html").write_text(out, encoding="utf-8")
-print(f"생성 완료: {dest}  ({dest.stat().st_size/1024:.0f} KB)  (+ index.html)")
+# GitHub Pages(브랜치 /docs 기반) 진입점
+docs = HERE.parent / "docs"
+docs.mkdir(exist_ok=True)
+(docs / "index.html").write_text(out, encoding="utf-8")
+(docs / ".nojekyll").write_text("", encoding="utf-8")   # Jekyll 처리 비활성화
+print(f"생성 완료: {dest}  ({dest.stat().st_size/1024:.0f} KB)  (+ index.html, docs/index.html)")
