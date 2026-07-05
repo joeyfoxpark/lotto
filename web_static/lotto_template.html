@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🍀 행운로또 — 통계·패턴·사주 번호</title>
+<title>🍀 로또리에 Lottorie — 통계·패턴·사주 번호</title>
 <style>
 :root{--bg:#0f1226;--card:#1a1f3d;--card2:#232a52;--line:#2e3768;--txt:#e8eaf5;
 --muted:#9aa3d0;--accent:#5b8cff;--accent2:#7a5cff;--good:#33d69f;--warn:#ffcf5c;}
@@ -56,7 +56,7 @@ th{color:var(--muted);font-weight:600}tr:hover td{background:var(--card2)}
 </head>
 <body>
 <header><div class="head-in">
-  <div class="logo">🍀 <span>행운로또</span></div>
+  <div class="logo">🍀 <span>로또리에</span></div>
   <nav id="nav">
     <a data-p="home" class="active">홈</a>
     <a data-p="stats">통계</a>
@@ -411,7 +411,7 @@ function isoDate(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStar
 
 function renderHome(){const L=draws[draws.length-1];const nums=L.slice(2,8),bonus=L[8];
   el('home').innerHTML=`
-  <div class="card hero"><h1>🍀 행운로또</h1><p>1회차부터 최신까지의 데이터로 보는 통계·패턴·사주 번호</p></div>
+  <div class="card hero"><h1>🍀 로또리에</h1><p class="muted" style="letter-spacing:2px;font-size:13px">L O T T O R I E</p><p>1회차부터 최신까지의 데이터로 보는 통계·패턴·사주 번호</p></div>
   <div class="card"><h2>🎯 최신 당첨번호 · ${L[0]}회 <span class="muted" style="font-size:13px">(${L[1]})</span></h2>
     <div class="balls">${nums.map(n=>ball(n)).join('')}<div class="plus">+</div>${ball(bonus)}</div>
     <div class="grid" style="margin-top:16px">
