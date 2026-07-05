@@ -17,7 +17,7 @@ OUT = ROOT / "web_static" / "assets"
 OUT.mkdir(parents=True, exist_ok=True)
 
 # 목표 팔레트 (앱과 동일하게 사용)
-GOLD = (0xD0, 0xA8, 0x5F)   # 샴페인 골드
+GOLD = (0xD8, 0xB4, 0x6A)   # 샴페인 골드 (앱 강조색과 동일)
 WINE = (0x7A, 0x1F, 0x2F)   # 버건디
 GH, GS, _ = colorsys.rgb_to_hsv(*[c / 255 for c in GOLD])
 WH, WS, _ = colorsys.rgb_to_hsv(*[c / 255 for c in WINE])
