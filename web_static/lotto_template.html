@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🍀 로또리에 Lottorie — 통계·패턴·사주 번호</title>
+<title>로또리에 Lottorie — 통계·패턴·사주 번호</title>
+<link rel="icon" type="image/png" href="__LOGO__">
+<link rel="apple-touch-icon" href="__LOGO__">
 <style>
 :root{--bg:#0f1226;--card:#1a1f3d;--card2:#232a52;--line:#2e3768;--txt:#e8eaf5;
 --muted:#9aa3d0;--accent:#5b8cff;--accent2:#7a5cff;--good:#33d69f;--warn:#ffcf5c;}
@@ -14,7 +16,9 @@ a{color:inherit;text-decoration:none}
 .wrap{max-width:900px;margin:0 auto;padding:0 16px 60px}
 header{position:sticky;top:0;z-index:10;background:rgba(15,18,38,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .head-in{max-width:900px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.logo{font-size:20px;font-weight:800;letter-spacing:-.5px;cursor:pointer}
+.logo{font-size:20px;font-weight:800;letter-spacing:-.5px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.logo-img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.hero-logo{width:96px;height:96px;object-fit:contain;display:block;margin:0 auto 8px}
 [onclick]{cursor:pointer}   /* 클릭 가능한 요소는 손가락 커서 */
 .logo span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
 nav{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
@@ -57,7 +61,7 @@ th{color:var(--muted);font-weight:600}tr:hover td{background:var(--card2)}
 </head>
 <body>
 <header><div class="head-in">
-  <div class="logo" onclick="go('home')" title="홈으로">🍀 <span>로또리에</span></div>
+  <div class="logo" onclick="go('home')" title="홈으로"><img class="logo-img" src="__LOGO__" alt=""><span>로또리에</span></div>
   <nav id="nav">
     <a data-p="home" class="active">홈</a>
     <a data-p="stats">통계</a>
@@ -412,7 +416,7 @@ function isoDate(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStar
 
 function renderHome(){const L=draws[draws.length-1];const nums=L.slice(2,8),bonus=L[8];
   el('home').innerHTML=`
-  <div class="card hero"><h1>🍀 로또리에</h1><p class="muted" style="letter-spacing:2px;font-size:13px">L O T T O R I E</p><p>1회차부터 최신까지의 데이터로 보는 통계·패턴·사주 번호</p></div>
+  <div class="card hero"><img class="hero-logo" src="__LOGO__" alt="로또리에"><h1>로또리에</h1><p class="muted" style="letter-spacing:3px;font-size:13px">L O T T O R I E</p><p>1회차부터 최신까지의 데이터로 보는 통계·패턴·사주 번호</p></div>
   <div class="card"><h2>🎯 최신 당첨번호 · ${L[0]}회 <span class="muted" style="font-size:13px">(${L[1]})</span></h2>
     <div class="balls">${nums.map(n=>ball(n)).join('')}<div class="plus">+</div>${ball(bonus)}</div>
     <div class="grid" style="margin-top:16px">
