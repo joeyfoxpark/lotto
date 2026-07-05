@@ -1,0 +1,53 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+// 릴리스 서명(키스토어)은 환경변수/프로퍼티로 주입 (스토어 AAB용). 없으면 debug만 빌드됨.
+def ksFile = System.getenv("RELEASE_KEYSTORE") ?: project.findProperty("RELEASE_KEYSTORE")
+
+android {
+    namespace 'com.lottorie.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.lottorie.app"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        if (ksFile) {
+            release {
+                storeFile file(ksFile)
+                storePassword System.getenv("RELEASE_STORE_PASSWORD")
+                keyAlias System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (ksFile) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.webkit:webkit:1.11.0'
+    implementation 'com.google.android.gms:play-services-ads:23.3.0'
+}
