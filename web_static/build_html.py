@@ -27,4 +27,6 @@ docs = HERE.parent / "docs"
 docs.mkdir(exist_ok=True)
 (docs / "index.html").write_text(out, encoding="utf-8")
 (docs / ".nojekyll").write_text("", encoding="utf-8")   # Jekyll 처리 비활성화
+# 개인정보처리방침도 함께 배포
+(docs / "privacy.html").write_text((HERE / "privacy.html").read_text(encoding="utf-8"), encoding="utf-8")
 print(f"생성 완료: {dest}  ({dest.stat().st_size/1024:.0f} KB)  (+ index.html, docs/index.html)")
