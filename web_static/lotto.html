@@ -487,8 +487,35 @@ function renderSaju(){const def=isoDate(nextSaturday());
     <span class="radio"><input type="checkbox" id="precise" checked> 정밀보정(진태양시·서머타임)</span>
     <span class="radio"><input type="checkbox" id="nightzi"> 야자시(23시 이후 다음날)</span>
   </div>
-  <div style="margin-top:16px"><button class="btn" onclick="doSaju()">🔮 내 번호 뽑기</button></div></div>
-  <div id="sajuResult"></div>`;}
+  <div style="margin-top:16px"><button class="btn" id="sajuBtn" onclick="sajuGate()">🔮 내 번호 뽑기</button></div>
+  <div id="premiumBox"></div></div>
+  <div id="sajuResult"></div>`;
+  refreshSajuGateUI();}
+
+// ----- 사주 광고 게이트 + 프리미엄 -----
+function isPremium(){try{return window.AndroidAds&&window.AndroidAds.isPremium();}catch(e){return false;}}
+function sajuGated(){return window.AndroidAds&&!isPremium();}
+function refreshSajuGateUI(){
+  const btn=el('sajuBtn'), box=el('premiumBox');
+  if(!btn)return;
+  if(sajuGated()){
+    btn.innerHTML='🎬 광고 보고 내 번호 뽑기';
+    box.innerHTML=`<p class="muted" style="font-size:12px;margin-top:10px">사주 추천은 짧은 광고 1편을 보면 열려요.
+      광고 없이 바로 보려면 <b style="color:var(--gold)">프리미엄(₩3,000 · 1회 구매)</b>!</p>
+      <button class="btn ghost" style="font-size:13px;padding:8px 16px" onclick="AndroidAds.buyPremium()">✨ 광고 제거 — ₩3,000 (평생)</button>`;
+  }else{
+    btn.innerHTML='🔮 내 번호 뽑기';
+    box.innerHTML='';
+  }
+}
+window.__onPremium=function(){refreshSajuGateUI();
+  const m=el('premiumBox'); if(m)m.innerHTML='<p style="color:var(--gold)">✨ 프리미엄이 활성화됐어요! 이제 광고 없이 이용하세요.</p>';};
+function sajuGate(){
+  if(!sajuGated()){doSaju();return;}
+  el('sajuResult').innerHTML='<div class="card"><p class="muted">🎬 광고 시청 후 사주 추천이 열립니다…</p></div>';
+  window.__onAdReward=function(){window.__onAdReward=null;doSaju();};
+  window.AndroidAds.requestReward();
+}
 function cityOpts(){return Object.keys(CITY_LON).map(c=>`<option value="${c}" ${c==='서울'?'selected':''}>${c}</option>`).join('')+'<option value="__std">보정 안 함(표준시 135°)</option>';}
 function yearOpts(){let s='';for(let y=2026;y>=1930;y--)s+=`<option value="${y}" ${y===1990?'selected':''}>${y}</option>`;return s;}
 function numOpts(a,b){let s='';for(let i=a;i<=b;i++)s+=`<option value="${i}">${i}</option>`;return s;}
