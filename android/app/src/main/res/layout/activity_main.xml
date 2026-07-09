@@ -13,13 +13,13 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <!-- 애드몹 배너 (지금은 테스트 광고 단위 ID) -->
+    <!-- 애드몹 배너 (디버그=테스트 / 릴리스=실제, build.gradle resValue 주입) -->
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
+        ads:adUnitId="@string/admob_banner_id"/>
 
 </LinearLayout>

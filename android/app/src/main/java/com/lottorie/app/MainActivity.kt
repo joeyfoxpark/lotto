@@ -33,8 +33,8 @@ class MainActivity : AppCompatActivity() {
     private val siteUrl = "https://joeyfoxpark.github.io/lotto/"
     private val siteHost = "joeyfoxpark.github.io"
 
-    // 지금은 구글 공식 테스트 광고 ID. 출시 전 실제 애드몹 ID로 교체.
-    private val rewardedAdUnit = "ca-app-pub-3940256099942544/5224354917"
+    // 디버그=테스트 광고 / 릴리스=실제 광고 (build.gradle에서 주입)
+    private val rewardedAdUnit = BuildConfig.ADMOB_REWARDED_ID
 
     private val requestNotifPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }

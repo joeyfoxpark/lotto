@@ -16,7 +16,14 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+
+        // 기본(디버그): 구글 공식 테스트 광고 ID — 개발 중 실광고 클릭 사고 방지
+        manifestPlaceholders = [admobAppId: "ca-app-pub-3940256099942544~3347511713"]
+        resValue "string", "admob_banner_id", "ca-app-pub-3940256099942544/6300978111"
+        buildConfigField "String", "ADMOB_REWARDED_ID", '"ca-app-pub-3940256099942544/5224354917"'
     }
+
+    buildFeatures { buildConfig true }
 
     signingConfigs {
         if (ksFile) {
@@ -36,6 +43,10 @@ android {
             if (ksFile) {
                 signingConfig signingConfigs.release
             }
+            // 릴리스(스토어 배포)만 실제 애드몹 ID 사용
+            manifestPlaceholders = [admobAppId: "ca-app-pub-2686350528097374~6661527094"]
+            resValue "string", "admob_banner_id", "ca-app-pub-2686350528097374/1026057031"
+            buildConfigField "String", "ADMOB_REWARDED_ID", '"ca-app-pub-2686350528097374/6803750485"'
         }
     }
 

@@ -13,10 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lottorie">
 
-        <!-- AdMob 앱 ID (지금은 구글 공식 테스트 ID. 출시 전 실제 ID로 교체) -->
+        <!-- AdMob 앱 ID (디버그=테스트 ID / 릴리스=실제 ID, build.gradle에서 주입) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="${admobAppId}"/>
 
         <activity
             android:name=".MainActivity"

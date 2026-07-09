@@ -24,9 +24,13 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: 디버그 APK 빌드
+      - name: 디버그 APK 빌드 (테스트 광고 ID)
         working-directory: android
         run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: 릴리스 빌드 검증 (실제 광고 ID, 미서명)
+        working-directory: android
+        run: gradle assembleRelease --no-daemon --stacktrace
 
       - name: APK 업로드 (아티팩트)
         uses: actions/upload-artifact@v4
