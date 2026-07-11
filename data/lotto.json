@@ -24618,5 +24618,25 @@
       31,
       38
     ]
+  },
+  {
+    "round": 1232,
+    "date": "2026-07-11",
+    "bonus": 3,
+    "rank1_winners": 11,
+    "rank1_prize_each": 2533260819,
+    "rank1_prize_total": 27865869009,
+    "rank2_winners": 92,
+    "rank2_prize_each": 50481647,
+    "total_winners": 2691678,
+    "total_sales": 57318153053,
+    "numbers": [
+      12,
+      15,
+      19,
+      22,
+      24,
+      36
+    ]
   }
 ]
