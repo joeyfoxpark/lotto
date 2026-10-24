@@ -24898,5 +24898,45 @@
       32,
       42
     ]
+  },
+  {
+    "round": 1246,
+    "date": "2026-10-17",
+    "bonus": 6,
+    "rank1_winners": 16,
+    "rank1_prize_each": 1881025430,
+    "rank1_prize_total": 30096406880,
+    "rank2_winners": 64,
+    "rank2_prize_each": 78376060,
+    "total_winners": 2767460,
+    "total_sales": 60928553620,
+    "numbers": [
+      16,
+      22,
+      23,
+      24,
+      27,
+      28
+    ]
+  },
+  {
+    "round": 1247,
+    "date": "2026-10-24",
+    "bonus": 24,
+    "rank1_winners": 8,
+    "rank1_prize_each": 3637439250,
+    "rank1_prize_total": 29099514000,
+    "rank2_winners": 74,
+    "rank2_prize_each": 65539446,
+    "total_winners": 2748972,
+    "total_sales": 59490522503,
+    "numbers": [
+      8,
+      14,
+      21,
+      22,
+      42,
+      45
+    ]
   }
 ]
