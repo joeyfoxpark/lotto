@@ -14,8 +14,8 @@ android {
         applicationId "com.lottorie.app"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
 
         // 기본(디버그): 구글 공식 테스트 광고 ID — 개발 중 실광고 클릭 사고 방지
         manifestPlaceholders = [admobAppId: "ca-app-pub-3940256099942544~3347511713"]

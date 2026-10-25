@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="lottorie-build" content="__BUILD__">
 <title>로또리에 Lottorie — 통계·패턴·사주 번호</title>
 <link rel="icon" type="image/png" href="__LOGO__">
 <link rel="apple-touch-icon" href="__LOGO__">
@@ -57,6 +58,15 @@ th{color:var(--muted);font-weight:600}tr:hover td{background:var(--card2)}
 .muted{color:var(--muted)}
 .disc{font-size:12px;color:var(--muted);text-align:center;margin-top:24px;padding:14px;border:1px dashed var(--line);border-radius:12px}
 .strat{border-left:3px solid var(--accent);padding-left:12px;margin:14px 0}.strat .name{font-weight:700}
+.prof{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card2);margin:8px 0;flex-wrap:wrap}
+.prof.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}.prof-info{flex:1;min-width:150px}
+.ball.hit{box-shadow:0 0 0 3px var(--good),inset 0 -3px 6px rgba(0,0,0,.25)}.ball.bonus{box-shadow:0 0 0 3px var(--accent),inset 0 -3px 6px rgba(0,0,0,.25)}.ball.miss{opacity:.3}
+.hist{border:1px solid var(--line);border-radius:12px;background:var(--card2);padding:10px 12px;margin:8px 0}
+.hist-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}
+.hist .balls{margin:8px 0 4px}.hist-act{display:flex;gap:6px;margin-left:auto}.hist-act .btn,.setrow .btn{font-size:13px;padding:6px 10px}
+.setrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.setrow .balls{margin:6px 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#2a241c;color:#fff;padding:10px 16px;border-radius:12px;border:1px solid var(--line);font-size:14px;opacity:0;transition:.25s;z-index:50;max-width:90vw;text-align:center;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%)}
+.upbar{position:fixed;left:12px;right:12px;bottom:16px;background:#2a241c;border:1px solid var(--accent);border-radius:14px;padding:10px 14px;font-size:14px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;z-index:60;box-shadow:0 6px 24px rgba(0,0,0,.4)}
 .page{display:none}.page.active{display:block}
 </style>
 </head>
@@ -97,6 +107,9 @@ const draws = DATA.draws;                       // [round,date,n1..n6,bonus,...]
 const drawNums = draws.map(d=>d.slice(2,8));    // [[6개],...]
 const DRAW_BY_ROUND={};draws.forEach(d=>DRAW_BY_ROUND[d[0]]=d);
 const LATEST_ROUND=draws[draws.length-1][0];
+const DRAW_BY_DATE={};draws.forEach(d=>DRAW_BY_DATE[d[1]]=d);
+const SITE_URL='https://joeyfoxpark.github.io/lotto/';
+const BUILD_STAMP=(document.querySelector('meta[name=lottorie-build]')||{}).content||'';
 const el = id => document.getElementById(id);
 function ballCls(n){return n<=10?'b1':n<=20?'b2':n<=30?'b3':n<=40?'b4':'b5';}
 function ball(n,sm){return `<div class="ball ${ballCls(n)} ${sm?'sm':''}">${n}</div>`;}
@@ -418,6 +431,68 @@ function backtest(n){
 function nextSaturday(){const t=new Date();const ahead=(6-t.getDay()+7)%7;t.setDate(t.getDate()+ahead);return t;}
 function isoDate(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
 
+// ====================== 내 번호 기록 · 자동 채점 ======================
+const HIST_KEY='lottorie_history', HIST_MAX=60;
+function loadHist(){try{const a=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function saveHist(a){try{localStorage.setItem(HIST_KEY,JSON.stringify(a));}catch(e){}}
+function roundForDate(iso){const L=draws[draws.length-1];const a=new Date(L[1]+'T00:00:00'),b=new Date(iso+'T00:00:00');
+  const w=Math.round((b-a)/(7*86400000));return L[0]+(isFinite(w)?w:1);}
+function addHistory(nums,src,label,drawIso,pkey){const h=loadHist();const round=roundForDate(drawIso);
+  const key=round+'|'+src+'|'+nums.join(',');if(h.some(x=>x.key===key))return false;
+  h.unshift({key,round,date:drawIso,nums:[...nums],src,label:label||'',pkey:pkey||'',at:Date.now()});saveHist(h.slice(0,HIST_MAX));return true;}
+function removeHistory(key){saveHist(loadHist().filter(x=>x.key!==key));renderHome();}
+function clearHistory(){if(!confirm('내 번호 기록을 모두 지울까요?'))return;saveHist([]);renderHome();}
+function gradeHistory(){return loadHist().map(e=>{const row=DRAW_BY_DATE[e.date]||DRAW_BY_ROUND[e.round];
+  if(!row)return Object.assign({},e,{done:false});const actual=row.slice(2,8),bonus=row[8];const [m,rank]=grade(e.nums,actual,bonus);
+  return Object.assign({},e,{done:true,round:row[0],m,rank,actual,bonus});});}
+function srcName(src){return src==='saju'?'🔮 사주':(STRATS[src]?'🎲 '+STRATS[src][0]:escH(src));}
+function entryTitle(e){return (e.label?escH(e.label)+'님 · ':'')+srcName(e.src);}
+function gradedHtml(e){const set=new Set(e.actual);const rk=e.rank;
+  const txt=rk?`${e.m}개 적중 · <b style="color:var(--good)">${rk}등 🎉</b>`:`${e.m}개 적중 · 낙첨`;
+  return `<div class="hist"><div class="hist-top"><b>${entryTitle(e)}</b><span class="muted" style="font-size:12px">${e.round}회 · ${txt}</span></div>
+    <div class="balls" style="justify-content:flex-start">${e.nums.map(n=>`<div class="ball sm ${ballCls(n)} ${set.has(n)?'hit':(e.bonus===n?'bonus':'miss')}">${n}</div>`).join('')}</div></div>`;}
+function summaryHtml(g){if(!g.length)return '';const cnt={};g.forEach(e=>{if(e.rank)cnt[e.rank]=(cnt[e.rank]||0)+1;});
+  const avg=(g.reduce((a,e)=>a+e.m,0)/g.length).toFixed(2);const wins=[1,2,3,4,5].filter(r=>cnt[r]).map(r=>`${r}등 ${cnt[r]}회`).join(' · ');
+  return `<p class="muted" style="font-size:13px;margin-top:8px">📊 채점 ${g.length}세트 · 평균 적중 ${avg}개${wins?' · '+wins:' · 아직 당첨 없음'} <span style="font-size:11px">(무작위 기대값 약 0.8개)</span></p>`;}
+function toggleHist(){const x=el('histAll');if(x)x.style.display=x.style.display==='none'?'':'none';}
+function quickSaju(i){go('saju');pickSajuProfile(i);}
+function myNumbersHtml(){
+  const hist=gradeHistory(),profiles=loadSajuProfiles();
+  const nextIso=isoDate(nextSaturday()),upRound=roundForDate(nextIso);
+  const pending=hist.filter(e=>!e.done),graded=hist.filter(e=>e.done);
+  if(!hist.length&&!profiles.length){return `<div class="card"><h2>🎟️ 내 번호</h2>
+    <p class="muted">사주나 패턴으로 뽑은 번호를 저장해두면, 추첨 결과가 나올 때 여기서 <b>자동으로 채점</b>해 드려요.</p>
+    <div style="margin-top:12px"><button class="btn" onclick="go('saju')">🔮 사주로 내 번호 뽑기</button></div></div>`;}
+  let h=`<div class="card"><h2>🎟️ 내 번호 <span class="muted" style="font-size:13px">다음 추첨 ${upRound}회 · ${nextIso}</span></h2>`;
+  if(pending.length){h+=pending.map(e=>`<div class="hist"><div class="hist-top"><b>${entryTitle(e)}</b><span class="muted" style="font-size:12px">${e.round}회 대기</span></div>
+    <div class="setrow">${ballsRow(e.nums,true)}<div class="hist-act">
+      <button class="btn ghost" title="공유" onclick="shareNums(shareText(${JSON.stringify(e.nums)},${escH(JSON.stringify(e.label))},${e.round},'${escH(e.src)}'))">📤 공유</button>
+      <button class="btn ghost" title="삭제" onclick="removeHistory('${escH(e.key)}')">🗑</button></div></div></div>`).join('');}
+  const covered=new Set(pending.filter(e=>e.src==='saju').map(e=>e.pkey));
+  const todo=profiles.map((p,i)=>[p,i]).filter(([p])=>!covered.has(sajuKey(p)));
+  if(todo.length){h+=`<div style="margin-top:8px">${todo.map(([p,i])=>`<button class="btn" style="margin:4px 6px 4px 0;font-size:14px;padding:9px 16px" onclick="quickSaju(${i})">🔮 ${escH(p.label)||'내 사주'} 이번 주 번호 뽑기</button>`).join('')}</div>`;}
+  if(graded.length){const lastRound=Math.max(...graded.map(e=>e.round));const last=graded.filter(e=>e.round===lastRound);const row=DRAW_BY_ROUND[lastRound];
+    h+=`<h3>📣 ${lastRound}회 결과 <span class="muted" style="font-size:12px">당첨 ${row.slice(2,8).join(' ')} + ${row[8]}</span></h3>`+last.map(gradedHtml).join('');
+    const rest=graded.filter(e=>e.round!==lastRound);
+    h+=`<div style="margin-top:12px"><button class="btn ghost" style="font-size:13px;padding:7px 14px" onclick="toggleHist()">📒 지난 기록 (${rest.length})</button>
+      <button class="btn ghost" style="font-size:13px;padding:7px 14px" onclick="clearHistory()">기록 지우기</button></div>
+      <div id="histAll" style="display:none">${rest.map(gradedHtml).join('')}</div>${summaryHtml(graded)}`;}
+  else if(pending.length){h+=`<p class="muted" style="font-size:12px;margin-top:10px">토요일 추첨 후 데이터가 갱신되면 자동으로 채점해 드려요. <button class="btn ghost" style="font-size:12px;padding:5px 10px" onclick="clearHistory()">기록 지우기</button></p>`;}
+  return h+'</div>';}
+
+// ----- 공유 · 토스트 -----
+function shareText(nums,label,round,src){const what=src==='saju'?'사주':(STRATS[src]?STRATS[src][0]+' 전략':'추천');
+  return `🍀 로또리에 ${round}회 ${label?label+'님의 ':''}${what} 번호\n${nums.join(' · ')}\n\n재미로 보는 추천이에요 🙂\n${SITE_URL}`;}
+async function shareNums(text){
+  try{if(window.AndroidApp&&window.AndroidApp.share){window.AndroidApp.share(text);return;}}catch(e){}
+  try{if(navigator.share){await navigator.share({text});return;}}catch(e){if(e&&e.name==='AbortError')return;}
+  try{await navigator.clipboard.writeText(text);toast('번호를 복사했어요. 원하는 곳에 붙여넣기 하세요!');}
+  catch(e){prompt('아래 내용을 복사해서 공유하세요',text);}}
+function toast(msg){let t=el('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),2600);}
+window.__onSiteUpdated=function(){if(el('upbar'))return;const b=document.createElement('div');b.id='upbar';b.className='upbar';
+  b.innerHTML='📥 새 회차 데이터가 도착했어요 <button class="btn" style="padding:6px 12px;font-size:13px" onclick="location.reload()">새로고침</button>';document.body.appendChild(b);};
+
 function renderHome(){const L=draws[draws.length-1];const nums=L.slice(2,8),bonus=L[8];
   el('home').innerHTML=`
   <div class="card hero"><img class="hero-logo" src="__LOGO__" alt="로또리에"><h1>로또리에</h1><p class="muted" style="letter-spacing:3px;font-size:13px">L O T T O R I E</p><p>1회차부터 최신까지의 데이터로 보는 통계·패턴·사주 번호</p></div>
@@ -428,6 +503,7 @@ function renderHome(){const L=draws[draws.length-1];const nums=L.slice(2,8),bonu
       <div class="mini"><div class="muted">1등 1인당</div><div class="big">${Math.floor(L[10]/100000000)}억</div></div>
       <div class="mini"><div class="muted">총 판매액</div><div class="big">${Math.floor(L[11]/100000000)}억</div></div>
     </div></div>
+  ${myNumbersHtml()}
   <div class="card"><h2>무엇을 해볼까요?</h2><div class="grid">
     <a class="mini" onclick="go('stats')"><div class="big">📊</div>패턴 통계</a>
     <a class="mini" onclick="go('rec')"><div class="big">🎲</div>패턴별 추천</a>
@@ -458,17 +534,29 @@ function renderStats(){const s=computeStats();
     <div class="mini"><div class="muted">연속번호 포함</div><div class="big">${Math.round(s.consec/s.total*1000)/10}%</div></div>
   </div><h3>궁합수 Top10</h3><div class="row" style="gap:8px">${s.pairs.map(p=>`<span class="tag">${p[0][0]} & ${p[0][1]} · ${p[1]}회</span>`).join('')}</div></div>`;}
 
+function setRow(k,nums){const j=JSON.stringify(nums);
+  return `<div class="setrow">${ballsRow(nums,true)}<div class="hist-act">
+    <button class="btn ghost" title="내 번호로 저장" onclick="saveSet('${k}',${j},this)">💾 저장</button>
+    <button class="btn ghost" title="공유" onclick="shareNums(shareText(${j},'',roundForDate(isoDate(nextSaturday())),'${k}'))">📤</button></div></div>`;}
+function saveSet(k,nums,btn){const ok=addHistory(nums,k,'',isoDate(nextSaturday()));
+  if(btn){btn.textContent='✅ 저장됨';btn.disabled=true;}
+  toast(ok?'내 번호에 저장했어요. 결과가 나오면 홈에서 채점해 드려요!':'이미 저장된 번호예요.');}
 function renderRec(){el('rec').innerHTML=`<div class="card"><h2>🎲 패턴별 번호 추천</h2>
-  <p class="muted">${Object.keys(STRATS).length}가지 전략으로 뽑은 번호입니다. 버튼으로 세트를 더 받아보세요.</p>
+  <p class="muted">${Object.keys(STRATS).length}가지 전략으로 뽑은 번호입니다. 마음에 드는 세트는 💾 저장해 두면 홈에서 자동 채점돼요.</p>
   ${Object.entries(STRATS).map(([k,v])=>`<div class="strat"><div class="name">${v[0]} <span class="muted" style="font-weight:400">— ${v[1]}</span></div>
-    <div id="first-${k}">${ballsRow(v[2](),true)}</div>
+    <div id="first-${k}">${setRow(k,v[2]())}</div>
     <button class="btn ghost" style="font-size:13px;padding:6px 14px" onclick="moreRec('${k}')">+ 5세트 더</button>
     <div id="more-${k}"></div></div>`).join('')}</div>`;}
-function moreRec(k){el('more-'+k).innerHTML=Array.from({length:5},()=>ballsRow(STRATS[k][2](),true)).join('');}
+function moreRec(k){el('more-'+k).innerHTML=Array.from({length:5},()=>setRow(k,STRATS[k][2]())).join('');}
 
 function renderSaju(){const def=isoDate(nextSaturday());
+  const profiles=loadSajuProfiles();
   el('saju').innerHTML=`<div class="card"><h2>🔮 사주(명리학) 기반 추천</h2>
   <p class="muted">생년월일시로 사주팔자를 계산하고, 부족한 오행과 추첨일의 기운을 반영해 번호를 뽑습니다.</p>
+  <div id="sajuProfiles"></div>
+  <div id="sajuForm" style="${profiles.length?'display:none':''}">
+  <label>이름 <span class="muted" style="font-size:11px">(선택 · 가족·지인 사주를 함께 저장할 때 구분용)</span></label>
+  <input id="plabel" maxlength="12" placeholder="예: 나, 엄마, 친구">
   <label>달력</label><div>
     <span class="radio"><input type="radio" name="cal" value="solar" checked> 양력</span>
     <span class="radio"><input type="radio" name="cal" value="lunar"> 음력</span>
@@ -487,10 +575,55 @@ function renderSaju(){const def=isoDate(nextSaturday());
     <span class="radio"><input type="checkbox" id="precise" checked> 정밀보정(진태양시·서머타임)</span>
     <span class="radio"><input type="checkbox" id="nightzi"> 야자시(23시 이후 다음날)</span>
   </div>
-  <div style="margin-top:16px"><button class="btn" id="sajuBtn" onclick="sajuGate()">🔮 내 번호 뽑기</button></div>
+  <div class="row" style="margin-top:16px">
+    <div style="flex:0"><button class="btn" id="sajuBtn" onclick="sajuGate()">🔮 내 번호 뽑기</button></div>
+    <div style="flex:0"><button class="btn ghost" id="sajuFold" style="display:none" onclick="toggleSajuForm(false)">접기</button></div>
+  </div>
+  <p class="muted" style="font-size:12px;margin-top:10px">🔒 입력한 정보는 이 기기 안에만 저장돼요(서버 전송 없음). 다음부터는 버튼 한 번으로 바로 뽑을 수 있습니다.</p>
+  </div>
   <div id="premiumBox"></div></div>
   <div id="sajuResult"></div>`;
+  renderSajuProfiles();
   refreshSajuGateUI();}
+
+// ----- 사주 정보 기억 (기기 내 localStorage · 서버 전송 없음) -----
+const SAJU_KEY='lottorie_saju_profiles', SAJU_MAX=6;
+let activeSajuIdx=-1;
+function escH(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function loadSajuProfiles(){try{const a=JSON.parse(localStorage.getItem(SAJU_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function saveSajuProfiles(a){try{localStorage.setItem(SAJU_KEY,JSON.stringify(a));}catch(e){}}
+function readSajuForm(){return {label:(el('plabel').value||'').trim(),cal:document.querySelector('input[name=cal]:checked').value,leap:el('leap').checked,
+  by:+el('by').value,bm:+el('bm').value,bd:+el('bd').value,bh:el('bh').value,city:el('city').value,precise:el('precise').checked,nightzi:el('nightzi').checked};}
+function sajuKey(p){return [p.cal,p.leap?1:0,p.by,p.bm,p.bd,p.bh,p.city,p.precise?1:0,p.nightzi?1:0].join('|');}
+function fillSajuForm(p){const r=document.querySelector(`input[name=cal][value="${p.cal==='lunar'?'lunar':'solar'}"]`);if(r)r.checked=true;
+  el('leap').checked=!!p.leap;el('by').value=p.by;el('bm').value=p.bm;el('bd').value=p.bd;el('bh').value=p.bh;el('city').value=p.city;
+  el('precise').checked=p.precise!==false;el('nightzi').checked=!!p.nightzi;el('plabel').value=p.label||'';}
+function rememberSajuProfile(){const p=readSajuForm();const key=sajuKey(p);const list=loadSajuProfiles();
+  const i=list.findIndex(x=>sajuKey(x)===key);
+  if(i>=0){if(!p.label)p.label=list[i].label||'';list[i]=p;activeSajuIdx=i;}
+  else{list.unshift(p);activeSajuIdx=0;}
+  saveSajuProfiles(list.slice(0,SAJU_MAX));renderSajuProfiles();return p;}
+function sajuProfileText(p){const h=p.bh==='unknown'?'시간 모름':String(p.bh).padStart(2,'0')+'시';
+  return `${p.cal==='lunar'?'음력':'양력'} ${p.by}.${String(p.bm).padStart(2,'0')}.${String(p.bd).padStart(2,'0')}${p.cal==='lunar'&&p.leap?'(윤달)':''} · ${h} · ${p.city==='__std'?'표준시':escH(p.city)}`;}
+function renderSajuProfiles(){const box=el('sajuProfiles');if(!box)return;const list=loadSajuProfiles();
+  const fold=el('sajuFold');if(fold)fold.style.display=list.length?'':'none';
+  if(!list.length){box.innerHTML='';return;}
+  const gated=sajuGated();
+  box.innerHTML=`<h3 style="margin-top:4px">💾 저장된 사주 <span class="muted" style="font-size:12px">(${list.length}/${SAJU_MAX})</span></h3>
+  ${list.map((p,i)=>`<div class="prof ${i===activeSajuIdx?'on':''}">
+    <div class="prof-info"><b>${escH(p.label)||(list.length===1?'내 사주':'사주 '+(i+1))}</b><div class="muted" style="font-size:12px">${sajuProfileText(p)}</div></div>
+    <button class="btn" style="padding:8px 14px;font-size:14px" onclick="pickSajuProfile(${i})">${gated?'🎬 광고 보고 뽑기':'🔮 바로 뽑기'}</button>
+    <button class="btn ghost" style="padding:8px 10px;font-size:13px" title="수정" onclick="editSajuProfile(${i})">✏️</button>
+    <button class="btn ghost" style="padding:8px 10px;font-size:13px" title="삭제" onclick="deleteSajuProfile(${i})">🗑</button></div>`).join('')}
+  <div style="margin-top:10px"><button class="btn ghost" style="font-size:13px;padding:8px 14px" onclick="toggleSajuForm(true,true)">➕ 다른 사주 추가</button></div>`;}
+function toggleSajuForm(show,reset){const f=el('sajuForm');if(!f)return;f.style.display=show?'':'none';
+  if(show&&reset){activeSajuIdx=-1;el('plabel').value='';renderSajuProfiles();}
+  if(show)f.scrollIntoView({behavior:'smooth',block:'start'});}
+function pickSajuProfile(i){const p=loadSajuProfiles()[i];if(!p)return;fillSajuForm(p);activeSajuIdx=i;renderSajuProfiles();sajuGate();}
+function editSajuProfile(i){const p=loadSajuProfiles()[i];if(!p)return;fillSajuForm(p);activeSajuIdx=i;renderSajuProfiles();toggleSajuForm(true);}
+function deleteSajuProfile(i){const list=loadSajuProfiles();const p=list[i];
+  if(p&&!confirm(`'${p.label||sajuProfileText(p)}' 저장 정보를 삭제할까요?`))return;
+  list.splice(i,1);saveSajuProfiles(list);activeSajuIdx=-1;renderSajuProfiles();if(!list.length)toggleSajuForm(true);}
 
 // ----- 사주 광고 게이트 + 프리미엄 -----
 function isPremium(){try{return window.AndroidAds&&window.AndroidAds.isPremium();}catch(e){return false;}}
@@ -507,6 +640,7 @@ function refreshSajuGateUI(){
     btn.innerHTML='🔮 내 번호 뽑기';
     box.innerHTML='';
   }
+  renderSajuProfiles();
 }
 window.__onPremium=function(){refreshSajuGateUI();
   const m=el('premiumBox'); if(m)m.innerHTML='<p style="color:var(--gold)">✨ 프리미엄이 활성화됐어요! 이제 광고 없이 이용하세요.</p>';};
@@ -525,17 +659,23 @@ function doSaju(){try{
   const leap=el('leap').checked;let y=+el('by').value,m=+el('bm').value,d=+el('bd').value;
   if(cal==='lunar'){[y,m,d]=lunarToSolar(y,m,d,leap);}
   const hv=el('bh').value;const hour=hv==='unknown'?null:+hv;
-  const dv=el('dd').value.split('-').map(Number);const drawDate={y:dv[0],m:dv[1],d:dv[2]};
+  if(!el('dd').value)el('dd').value=isoDate(nextSaturday());
+  const drawIso=el('dd').value;const dv=drawIso.split('-').map(Number);const drawDate={y:dv[0],m:dv[1],d:dv[2]};
   const cityV=el('city').value;const lon=cityV==='__std'?135:(CITY_LON[cityV]||135);
   const opts={lon,precise:el('precise').checked,nightZi:el('nightzi').checked};
   const r=sajuRecommend(y,m,d,hour,drawDate,opts);
+  const prof=rememberSajuProfile();toggleSajuForm(false);
+  addHistory(r.numbers,'saju',prof.label,drawIso,sajuKey(prof));const histRound=roundForDate(drawIso);
   const oh=r.numbers.map(n=>numOheng(n));
-  el('sajuResult').innerHTML=`<div class="card"><h2>✨ 추천 결과</h2>
+  el('sajuResult').innerHTML=`<div class="card"><h2>✨ ${prof.label?escH(prof.label)+'님의 ':''}추천 결과</h2>
     <div class="balls">${r.numbers.map((n,i)=>`<div style="text-align:center">${ball(n)}<div class="ball-oh oh-${oh[i]}">${oh[i]}</div></div>`).join('')}</div>
+    <div class="row" style="margin-top:4px;gap:8px">
+      <div style="flex:0"><button class="btn ghost" style="font-size:13px;padding:7px 14px" onclick="shareNums(shareText(${JSON.stringify(r.numbers)},${escH(JSON.stringify(prof.label))},${histRound},'saju'))">📤 공유</button></div>
+      <div style="flex:0"><button class="btn ghost" style="font-size:13px;padding:7px 14px" onclick="go('home')">🏠 내 번호 보기</button></div></div>
     <h3>내 사주팔자</h3><div class="row" style="gap:8px">${Object.entries(r.saju.pillars).map(([k,v])=>`<div class="mini"><div class="muted">${k}</div><div class="big" style="font-size:18px">${v}</div></div>`).join('')}</div>
     <h3>오행 분포 <span class="muted" style="font-size:12px">(일간: ${r.saju.ilgan})</span></h3>
     <div class="row" style="gap:8px">${Object.entries(r.saju.oheng).map(([o,c])=>`<span class="tag oh-${o}">${o} × ${c}</span>`).join('')}</div>
-    <p class="muted" style="margin-top:14px;font-size:13px">양력 기준 ${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}${r.saju.solarTime?` · 진태양시 ${r.saju.solarTime}`:''} · 추첨일 일진 <b>${r.drawIljin}</b>의 기운 반영 · 같은 조건이면 항상 같은 번호가 나옵니다.</p></div>`+sajuReadingHtml(r);
+    <p class="muted" style="margin-top:14px;font-size:13px">양력 기준 ${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}${r.saju.solarTime?` · 진태양시 ${r.saju.solarTime}`:''} · 추첨일 일진 <b>${r.drawIljin}</b>의 기운 반영 · 같은 조건이면 항상 같은 번호가 나옵니다.<br>💾 입력 정보가 이 기기에 저장됐어요. 다음엔 위의 <b>바로 뽑기</b> 버튼만 누르면 됩니다.<br>📒 ${histRound}회 <b>내 번호</b>에 기록됐어요. 결과가 나오면 홈에서 자동 채점해 드려요.</p></div>`+sajuReadingHtml(r);
 }catch(e){el('sajuResult').innerHTML=`<div class="card"><p style="color:#ff8a8a">입력을 확인해 주세요: ${e}</p></div>`;}}
 
 function storeTable(list){return `<table><thead><tr><th>판매점</th><th>지역</th><th>주소</th><th>구분</th></tr></thead><tbody>${list.map(s=>`<tr><td><b>${s[0]||''}</b></td><td>${s[1]||''}</td><td class="muted" style="font-size:13px">${s[2]||''}</td><td>${s[3]||''}</td></tr>`).join('')}</tbody></table>`;}
@@ -582,13 +722,17 @@ function renderNotif(){
   if(!window.AndroidNotif){
     box.innerHTML=`<div class="card"><h2>🔔 주간 추천번호 알림</h2>
       <p class="muted">이 기능은 <b>로또리에 앱</b>에서 쓸 수 있어요. 원하는 요일·시간을 정해두면
-      매주 그 시각에 추천번호를 알림으로 보내드립니다.</p>
+      매주 그 시각에 추천번호(패턴 또는 <b>내 사주 번호</b>)를 알림으로 보내드립니다.</p>
       <p class="muted" style="font-size:12px">지금은 웹으로 보고 계세요. 앱을 설치하면 이 기능이 켜집니다.</p></div>`;
     return;
   }
   let s={enabled:false,day:7,hour:10,minute:0,strategy:'balanced'};
   try{s=JSON.parse(window.AndroidNotif.getSettings());}catch(e){}
   const t=String(s.hour).padStart(2,'0')+':'+String(s.minute).padStart(2,'0');
+  const profiles=loadSajuProfiles();
+  const sajuOpts=profiles.map(p=>{const v='saju:'+sajuKey(p);return `<option value="${escH(v)}" ${s.strategy===v?'selected':''}>🔮 사주 번호 — ${escH(p.label)||sajuProfileText(p)}</option>`;}).join('');
+  const orphan=(String(s.strategy).startsWith('saju:')&&!profiles.some(p=>'saju:'+sajuKey(p)===s.strategy))
+    ?`<option value="${escH(s.strategy)}" selected>🔮 사주 번호 (삭제된 사주 · 균형 번호로 대체됨)</option>`:'';
   box.innerHTML=`<div class="card"><h2>🔔 주간 추천번호 알림</h2>
     <p class="muted">정한 요일·시간에 매주 추천번호를 알림으로 받아요. (앱이 꺼져 있어도 동작)</p>
     <div style="margin:12px 0"><span class="radio"><input type="checkbox" id="nf_on" ${s.enabled?'checked':''}> <b>매주 알림 받기</b></span></div>
@@ -601,7 +745,10 @@ function renderNotif(){
       <option value="balanced" ${s.strategy==='balanced'?'selected':''}>균형 (홀짝·구간 밸런스)</option>
       <option value="hot" ${s.strategy==='hot'?'selected':''}>핫넘버 (자주 나온 번호)</option>
       <option value="random" ${s.strategy==='random'?'selected':''}>무작위</option>
+      ${sajuOpts}${orphan}
     </select>
+    ${profiles.length?'<p class="muted" style="font-size:12px;margin-top:6px">🔮 사주 번호를 고르면 매주 그 주 추첨일의 기운으로 계산한 <b>내 사주 번호</b>를 보내드려요.</p>'
+      :'<p class="muted" style="font-size:12px;margin-top:6px">💡 <a onclick="go(\'saju\')" style="color:var(--gold);text-decoration:underline">사주 탭</a>에서 번호를 한 번 뽑아 저장하면, 여기서 <b>내 사주 번호 알림</b>도 고를 수 있어요.</p>'}
     <div class="row" style="margin-top:16px">
       <div style="flex:0"><button class="btn" onclick="saveNotif()">저장</button></div>
       <div style="flex:0"><button class="btn ghost" onclick="testNotif()">테스트 알림</button></div>
@@ -610,17 +757,40 @@ function renderNotif(){
     <p class="muted" style="font-size:12px;margin-top:12px">※ 추첨은 매주 토요일 저녁이에요. 구매 전 시간으로 정해두면 좋아요. 재미로 보는 추천입니다.</p>
   </div>`;
 }
+// 사주 번호표: 다음 N주 토요일별 번호 (네이티브가 알림 시각에 해당 주 번호를 꺼내 씀)
+function sajuTableFor(p,weeks){const out={};const d=nextSaturday();
+  let y=p.by,m=p.bm,dd=p.bd;if(p.cal==='lunar'){[y,m,dd]=lunarToSolar(y,m,dd,p.leap);}
+  const hour=p.bh==='unknown'?null:+p.bh;const lon=p.city==='__std'?135:(CITY_LON[p.city]||135);
+  const opts={lon,precise:p.precise!==false,nightZi:!!p.nightzi};
+  for(let i=0;i<weeks;i++){const r=sajuRecommend(y,m,dd,hour,{y:d.getFullYear(),m:d.getMonth()+1,d:d.getDate()},opts);out[isoDate(d)]=r.numbers;d.setDate(d.getDate()+7);}
+  return out;}
+function pushSajuNumbers(strat){if(!window.AndroidNotif||!window.AndroidNotif.saveSajuNumbers)return false;
+  const key=String(strat).slice(5);const p=loadSajuProfiles().find(x=>sajuKey(x)===key);if(!p)return false;
+  try{window.AndroidNotif.saveSajuNumbers(JSON.stringify({label:p.label||'',key:strat,nums:sajuTableFor(p,16),builtAt:Date.now()}));return true;}catch(e){return false;}}
+function syncSajuNotif(){try{if(!window.AndroidNotif)return;const s=JSON.parse(window.AndroidNotif.getSettings());
+  if(s.enabled&&String(s.strategy).startsWith('saju:'))pushSajuNumbers(s.strategy);}catch(e){}}
 function saveNotif(){
+  const strat=el('nf_strat').value;
+  if(el('nf_on').checked&&strat.startsWith('saju:')&&sajuGated()){
+    el('nf_msg').innerHTML='🎬 사주 번호 알림은 짧은 광고 1편을 보면 설정돼요…';
+    window.__onAdReward=function(){window.__onAdReward=null;doSaveNotif();};
+    window.AndroidAds.requestReward();return;}
+  doSaveNotif();}
+function doSaveNotif(){
   const on=el('nf_on').checked, day=+el('nf_day').value;
   const p=el('nf_time').value.split(':'); const hour=+p[0], minute=+p[1];
   const strat=el('nf_strat').value;
   window.AndroidNotif.save(on,day,hour,minute,strat);
+  let extra='';
+  if(strat.startsWith('saju:')){extra=pushSajuNumbers(strat)?' 🔮 사주 번호로 보내드려요.':' (사주 정보를 찾지 못해 균형 번호로 보내요)';}
   el('nf_msg').innerHTML = on
-    ? `✅ 저장 완료! 매주 <b>${DOW[day]}요일 ${el('nf_time').value}</b>에 알림을 보내드릴게요.`
+    ? `✅ 저장 완료! 매주 <b>${DOW[day]}요일 ${el('nf_time').value}</b>에 알림을 보내드릴게요.${extra}`
     : '알림을 껐어요.';
 }
 function testNotif(){
-  window.AndroidNotif.sendTest(el('nf_strat').value);
+  const strat=el('nf_strat').value;
+  if(strat.startsWith('saju:'))pushSajuNumbers(strat);
+  window.AndroidNotif.sendTest(strat);
   el('nf_msg').innerHTML='🔔 테스트 알림을 보냈어요. 알림창을 확인해보세요!';
 }
 
@@ -631,10 +801,12 @@ function go(p){
   document.querySelectorAll('#nav a').forEach(x=>x.classList.toggle('active',x.dataset.p===p));
   el(p).classList.add('active');window.scrollTo(0,0);
   if(p==='notif'){renderNotif();return;}
+  if(p==='home'){renderHome();return;}
   if(!rendered[p]){({home:renderHome,stats:renderStats,rec:renderRec,saju:renderSaju,stores:renderStores,predict:()=>renderPredict(100)}[p])();rendered[p]=true;}
 }
 document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.p));
 renderHome();rendered.home=true;
+syncSajuNotif();
 </script>
 </body>
 </html>

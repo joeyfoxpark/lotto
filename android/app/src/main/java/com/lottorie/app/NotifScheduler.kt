@@ -42,6 +42,16 @@ object NotifScheduler {
         apply(ctx)
     }
 
+    private const val SAJU_JSON = "saju_json"
+
+    /** 웹앱이 계산해 넘긴 주차별 사주 번호표(JSON 문자열). */
+    fun getSajuJson(ctx: Context): String? =
+        ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getString(SAJU_JSON, null)
+
+    fun saveSajuJson(ctx: Context, json: String) {
+        ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).edit().putString(SAJU_JSON, json).apply()
+    }
+
     /** 현재 설정으로 다음 알림 예약 (또는 취소). */
     fun apply(ctx: Context) {
         val s = get(ctx)

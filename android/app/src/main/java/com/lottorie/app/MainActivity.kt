@@ -10,12 +10,14 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.webkit.WebViewAssetLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
@@ -30,7 +32,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var billing: BillingManager
     private var rewardedAd: RewardedAd? = null
 
-    private val siteUrl = "https://joeyfoxpark.github.io/lotto/"
+    // 웹앱은 앱에 동봉된 HTML(오프라인 가능)을 로컬 오리진으로 띄우고,
+    // SiteUpdater 가 GitHub Pages 최신본을 백그라운드로 받아 자동 갱신한다.
+    private val localHost = WebViewAssetLoader.DEFAULT_DOMAIN   // appassets.androidplatform.net
+    private val startUrl = "https://$localHost/app/index.html"
     private val siteHost = "joeyfoxpark.github.io"
 
     // 디버그=테스트 광고 / 릴리스=실제 광고 (build.gradle에서 주입)
@@ -71,24 +76,42 @@ class MainActivity : AppCompatActivity() {
         // 웹앱 ↔ 네이티브 브리지
         webView.addJavascriptInterface(NotifBridge(this), "AndroidNotif")
         webView.addJavascriptInterface(AdsBridge(this), "AndroidAds")
+        webView.addJavascriptInterface(AppBridge(this), "AndroidApp")
+
+        // 로컬 HTML 제공: 내부 저장소 갱신본 → 없으면 assets 동봉본
+        val assetLoader = WebViewAssetLoader.Builder()
+            .setDomain(localHost)
+            .addPathHandler("/app/", LocalSiteHandler(this))
+            .build()
 
         webView.webChromeClient = WebChromeClient()
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(
+                view: WebView, request: WebResourceRequest
+            ): WebResourceResponse? = assetLoader.shouldInterceptRequest(request.url)
+
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                val url = request.url.toString()
-                return if (request.url.host?.contains(siteHost) == true) {
+                val host = request.url.host ?: ""
+                return if (host == localHost || host.contains(siteHost)) {
                     false
                 } else {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(request.url.toString())))
                     true
                 }
             }
         }
 
         if (savedInstanceState == null) {
-            webView.loadUrl(siteUrl)
+            webView.loadUrl(startUrl)
         } else {
             webView.restoreState(savedInstanceState)
+        }
+
+        // 최신 회차 데이터(사이트 최신본) 백그라운드 확인 → 받으면 웹에 '새로고침' 배너 표시
+        SiteUpdater.checkAsync(this) {
+            runOnUiThread {
+                webView.evaluateJavascript("window.__onSiteUpdated && window.__onSiteUpdated();", null)
+            }
         }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -101,6 +124,20 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    // ------------------------ 공유 ------------------------
+    /** 번호 텍스트를 안드로이드 공유 시트로 보낸다(카카오톡·문자 등). */
+    fun shareText(text: String) {
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
+        try {
+            startActivity(Intent.createChooser(send, "번호 공유"))
+        } catch (e: Exception) {
+            // 공유 가능한 앱이 없는 경우 무시
+        }
     }
 
     // ------------------------ 보상형 광고 ------------------------

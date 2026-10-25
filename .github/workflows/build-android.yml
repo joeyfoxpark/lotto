@@ -24,6 +24,12 @@ jobs:
         with:
           gradle-version: '8.7'
 
+      - name: 웹앱 HTML을 앱에 동봉 (오프라인 실행용 · docs/ 최신본 복사)
+        run: |
+          mkdir -p android/app/src/main/assets
+          cp docs/index.html docs/privacy.html android/app/src/main/assets/
+          grep -o 'name="lottorie-build" content="[^"]*"' android/app/src/main/assets/index.html || echo "(빌드 스탬프 없음)"
+
       - name: 디버그 APK 빌드 (테스트 광고 ID)
         working-directory: android
         run: gradle assembleDebug --no-daemon --stacktrace

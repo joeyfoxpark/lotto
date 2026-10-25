@@ -18,3 +18,6 @@ android/app/build/
 android/local.properties
 *.keystore
 *.jks
+
+# 앱 동봉 HTML (build_html.py 가 생성, CI는 docs/ 에서 복사)
+android/app/src/main/assets/

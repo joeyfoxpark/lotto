@@ -32,6 +32,8 @@ lotto_project/
 │   ├─ app.py                 Flask 서버 (모든 기능을 웹으로)
 │   ├─ templates/             화면(HTML)
 │   └─ static/style.css       디자인
+├─ android/                    안드로이드 앱 (Kotlin WebView · 애드몹 · 인앱결제 · 주간 알림)
+│   └─ app/src/main/assets/    동봉 HTML (build_html.py 생성 · git 미추적 · CI가 docs/에서 복사)
 └─ data/                       (자동 생성)
     ├─ lotto.db                SQLite DB (회차 + 당첨판매점)
     ├─ lotto.json              전체 회차 JSON (앱에서 사용)
@@ -157,7 +159,17 @@ GET https://www.dhlottery.co.kr/lt645/selectPstLt645InfoNew.do
 - [x] 정밀 절기(태양황경) + 음력→양력 변환
 - [x] 당첨 판매점(1등/2등 배출점) 데이터 수집 + 명당 랭킹
 - [x] 웹 서비스(Flask) — 모든 기능 통합
-- [ ] 실서버 배포 (외부 접속 가능하게)
-- [ ] 안드로이드 앱(Flutter) + 광고(AdMob)
-- [ ] 데이터 자동 업데이트(매주 토요일) 파이프라인
-- [ ] 광고/플레이스토어 정책 검증
+- [x] 실서버 배포 — GitHub Pages (`docs/`)
+- [x] 데이터 자동 업데이트(매주 토요일) — GitHub Actions `weekly-update.yml`
+- [x] 안드로이드 앱(Kotlin WebView) + 애드몹 배너·보상형 + 프리미엄 인앱결제 + 주간 알림
+- [x] 사주 정보 기억(기기 내 저장, 최대 6명) · 내 번호 기록 & 자동 채점 · 공유
+- [x] 주간 알림에 내 사주 번호 연결 · 앱에 HTML 동봉(오프라인) + Pages 최신본 자동 갱신
+- [ ] 플레이스토어 등록 (targetSdk 상향 · 데이터 안전 섹션 · 정책 검토)
+
+## 앱 동작 메모 (개발자용)
+
+- 앱은 `assets/index.html`(동봉본)을 `https://appassets.androidplatform.net/app/` 오리진으로 띄웁니다.
+  실행 시 `SiteUpdater`가 Pages 최신본의 `<meta name="lottorie-build">` 스탬프를 비교해 더 새것이면
+  내부 저장소에 저장하고 웹에 "새로고침" 배너를 띄웁니다. 오리진이 고정이라 저장된 사주·기록(localStorage)이 유지됩니다.
+- 사주 번호 알림: 웹이 다음 16주 토요일별 사주 번호표를 `AndroidNotif.saveSajuNumbers()`로 넘기고,
+  알림 시각에 `RecoNumbers`가 해당 주 번호를 꺼냅니다(앱을 열 때마다 번호표 자동 갱신).

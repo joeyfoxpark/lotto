@@ -12,6 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 object Notif {
     const val CHANNEL = "weekly_reco"
     private const val NOTIF_ID = 1001
+    private const val DEFAULT_TITLE = "🍀 이번 주 로또리에 추천번호"
 
     fun ensureChannel(ctx: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -22,7 +23,12 @@ object Notif {
         }
     }
 
-    fun show(ctx: Context, nums: List<Int>) {
+    /**
+     * 추천번호 알림.
+     * @param title 제목(기본: 패턴 추천 / 사주 번호면 "🔮 ○○님의 이번 주 사주 번호")
+     * @param note  본문에 덧붙일 한 줄 안내(선택)
+     */
+    fun show(ctx: Context, nums: List<Int>, title: String = DEFAULT_TITLE, note: String? = null) {
         ensureChannel(ctx)
         val text = nums.joinToString("   ")
         val launch = ctx.packageManager.getLaunchIntentForPackage(ctx.packageName)
@@ -30,14 +36,14 @@ object Notif {
             ctx, 0, launch,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+        val big = StringBuilder(text).append("\n\n")
+        if (!note.isNullOrBlank()) big.append(note).append("\n")
+        big.append("행운을 빌어요! (재미로 보는 추천입니다)")
         val notif = NotificationCompat.Builder(ctx, CHANNEL)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("🍀 이번 주 로또리에 추천번호")
+            .setContentTitle(title)
             .setContentText(text)
-            .setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText("$text\n\n행운을 빌어요! (재미로 보는 추천입니다)")
-            )
+            .setStyle(NotificationCompat.BigTextStyle().bigText(big.toString()))
             .setAutoCancel(true)
             .setContentIntent(pi)
             .build()

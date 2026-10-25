@@ -27,8 +27,18 @@ class NotifBridge(private val ctx: Context) {
         NotifScheduler.save(ctx, NotifScheduler.Settings(enabled, day, hour, minute, strategy))
     }
 
+    /**
+     * 웹앱이 계산한 사주 번호표 저장.
+     * JSON: {"label":"나","key":"saju:...","nums":{"2026-10-31":[..6개..], ...}}
+     */
+    @JavascriptInterface
+    fun saveSajuNumbers(json: String) {
+        NotifScheduler.saveSajuJson(ctx, json)
+    }
+
     @JavascriptInterface
     fun sendTest(strategy: String) {
-        Notif.show(ctx, NumberGen.generate(strategy))
+        val r = RecoNumbers.forStrategy(ctx, strategy)
+        Notif.show(ctx, r.nums, r.title, r.note)
     }
 }
