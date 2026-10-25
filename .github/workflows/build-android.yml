@@ -18,7 +18,12 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # 기본값(packages: tools platform-tools)의 'tools' 패키지가 SDK 저장소에서 제거되어 실패하므로
+      # 빌드에 필요한 패키지만 명시해 설치한다.
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+          accept-android-sdk-licenses: true
 
       - uses: gradle/actions/setup-gradle@v4
         with:
