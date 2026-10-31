@@ -24938,5 +24938,25 @@
       42,
       45
     ]
+  },
+  {
+    "round": 1248,
+    "date": "2026-10-31",
+    "bonus": 22,
+    "rank1_winners": 15,
+    "rank1_prize_each": 1933658450,
+    "rank1_prize_total": 29004876750,
+    "rank2_winners": 91,
+    "rank2_prize_each": 53122485,
+    "total_winners": 2894583,
+    "total_sales": 60677757090,
+    "numbers": [
+      16,
+      18,
+      27,
+      36,
+      38,
+      42
+    ]
   }
 ]
